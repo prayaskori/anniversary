@@ -113,37 +113,40 @@ section{padding:7rem 0}
 .copy-btn:hover{background:var(--rose-dk)}
 
 /* ═══════════════════════════════════════
-   MUSIC PLAYER
+   SPOTIFY PLAYER WIDGET
 ═══════════════════════════════════════ */
-.music-player{
-  position:fixed;bottom:1.8rem;left:50%;transform:translateX(-50%);z-index:200;
-  display:flex;align-items:center;gap:1rem;
-  background:var(--glass);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
-  border:1px solid rgba(255,255,255,.9);border-radius:50px;
-  padding:.55rem 1.4rem .55rem 1rem;
-  box-shadow:0 8px 32px rgba(61,35,40,.18);transition:box-shadow .4s;white-space:nowrap;
+.spotify-trigger{
+  position:fixed;bottom:1.2rem;right:1rem;z-index:300;
+  display:flex;align-items:center;gap:.45rem;
+  background:#fff;color:var(--text);border:1.5px solid var(--rose);
+  padding:.5rem 1rem;border-radius:50px;
+  font-weight:600;font-size:.78rem;cursor:pointer;
+  box-shadow:0 4px 16px rgba(224,101,109,.15);transition:all .3s;font-family:var(--sans);
 }
-.music-player:hover{box-shadow:0 12px 40px rgba(224,101,109,.22)}
-.p-viz{display:flex;align-items:center;gap:2px;height:20px}
-.p-bar{width:3px;background:var(--rose);border-radius:2px;opacity:.7}
-.p-bar:nth-child(1){height:5px}.p-bar:nth-child(2){height:12px}.p-bar:nth-child(3){height:8px}.p-bar:nth-child(4){height:16px}.p-bar:nth-child(5){height:6px}
-.p-viz.playing .p-bar:nth-child(1){animation:pviz .7s ease-in-out infinite alternate}
-.p-viz.playing .p-bar:nth-child(2){animation:pviz .5s .1s ease-in-out infinite alternate}
-.p-viz.playing .p-bar:nth-child(3){animation:pviz .8s .05s ease-in-out infinite alternate}
-.p-viz.playing .p-bar:nth-child(4){animation:pviz .6s .15s ease-in-out infinite alternate}
-.p-viz.playing .p-bar:nth-child(5){animation:pviz .75s .08s ease-in-out infinite alternate}
-@keyframes pviz{0%{height:3px;opacity:.5}100%{height:19px;opacity:1}}
-.p-info{display:flex;flex-direction:column}
-.p-name{font-size:.8rem;font-weight:600;color:var(--text)}
-.p-sub{font-size:.67rem;color:var(--muted)}
-.p-controls{display:flex;align-items:center;gap:.1rem}
-.p-btn{width:28px;height:28px;border:none;background:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--muted);border-radius:50%;transition:all .2s;font-size:.85rem}
-.p-btn:hover{color:var(--rose);background:var(--rose-lt)}
-.p-btn.big{width:34px;height:34px;background:var(--rose);color:#fff;font-size:.9rem}
-.p-btn.big:hover{background:var(--rose-dk);transform:scale(1.08)}
-.p-dots{display:flex;gap:4px;align-items:center}
-.p-dot{width:6px;height:6px;border-radius:50%;background:#e0c0c0;border:none;cursor:pointer;transition:all .3s;padding:0}
-.p-dot.active{background:var(--rose);width:18px;border-radius:3px}
+.spotify-trigger:hover{background:var(--rose-lt);transform:translateY(-2px)}
+
+.spotify-drawer{
+  position:fixed;bottom:-320px;right:1rem;width:300px;
+  background:rgba(255,253,248,.98);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
+  border:1px solid rgba(224,101,109,.2);border-radius:16px;
+  box-shadow:0 8px 30px rgba(61,35,40,.18);z-index:300;
+  transition:bottom .45s cubic-bezier(.165,.84,.44,1);
+  padding:0.8rem;display:flex;flex-direction:column;gap:0.5rem;
+}
+.spotify-drawer.open{bottom:4.5rem}
+.sd-head{display:flex;justify-content:space-between;align-items:center}
+.sd-head h4{font-family:var(--serif);font-size:0.92rem;color:var(--text)}
+.sd-close{background:none;border:none;font-size:1.2rem;cursor:pointer;color:var(--muted);padding:0 .2rem;line-height:1}
+.sd-select{
+  width:100%;padding:.38rem .5rem;border-radius:8px;
+  border:1.5px solid #e8d5d0;background:#fff;font-family:var(--sans);
+  font-size:.75rem;color:var(--text);outline:none;cursor:pointer;
+}
+.sd-select:focus{border-color:var(--rose)}
+.sd-embed-container{
+  width:100%;height:130px;background:#f7eded;border-radius:10px;overflow:hidden;
+  position:relative;display:flex;align-items:center;justify-content:center;
+}
 
 /* ═══════════════════════════════════════
    HERO
@@ -265,8 +268,7 @@ footer{background:linear-gradient(135deg,#fde8e8,#fdf3e3);border-top:1px solid v
 /* ═══════════════════════════════════════
    RESPONSIVE
 ═══════════════════════════════════════ */
-@media(max-width:768px){.customizer{width:100%;right:-100%};section{padding:5rem 0}}
-@media(max-width:480px){.music-player{padding:.5rem 1rem;gap:.7rem}.p-info{display:none}.hero-title{font-size:2.2rem}.gifts-container{grid-template-columns:1fr}}
+@media(max-width:480px){.spotify-trigger{right:1rem;bottom:1rem;font-size:.78rem;padding:.5rem 1rem}.spotify-drawer{right:1rem;left:1rem;width:calc(100% - 2rem);bottom:-400px}.spotify-drawer.open{bottom:1rem}.hero-title{font-size:2.2rem}.gifts-container{grid-template-columns:1fr}}
 
 /* ═══════════════════════════════════════
    GIFT MODAL STYLES
@@ -469,6 +471,58 @@ footer{background:linear-gradient(135deg,#fde8e8,#fdf3e3);border-top:1px solid v
   transform:scale(1.05);
   box-shadow:0 6px 15px rgba(224,101,109,0.3);
 }
+
+/* ═══════════════════════════════════════
+   UPLOAD ZONE & PROGRESS & COLLAGE
+   ═══════════════════════════════════════ */
+.upload-zone-wrapper {
+  margin-bottom: 2.5rem;
+  text-align: center;
+}
+.upload-zone {
+  border: 2.5px dashed var(--rose);
+  background: var(--rose-lt);
+  border-radius: 20px;
+  padding: 2.5rem 1.5rem;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  max-width: 600px;
+  margin: 0 auto;
+  position: relative;
+  box-shadow: 0 4px 12px rgba(224,101,109,0.05);
+}
+.upload-zone:hover {
+  background: #fde2e4;
+  border-color: var(--rose-dk);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(224,101,109,0.12);
+}
+.upload-zone-active {
+  background: #fcd2d1 !important;
+  border-color: var(--rose-dk) !important;
+}
+
+#btn-next-collage.unlocked {
+  animation: pulse-glow 2s infinite alternate;
+}
+@keyframes pulse-glow {
+  0% {
+    box-shadow: 0 0 10px rgba(224,101,109,0.4);
+    transform: scale(1);
+  }
+  100% {
+    box-shadow: 0 0 25px rgba(224,101,109,0.8);
+    transform: scale(1.03);
+  }
+}
+
+.checklist-item {
+  transition: all 0.3s;
+}
+.checklist-item .chk-status {
+  font-size: 1.1rem;
+  font-weight: bold;
+}
 </style>
 </head>
 <body>
@@ -519,11 +573,21 @@ footer{background:linear-gradient(135deg,#fde8e8,#fdf3e3);border-top:1px solid v
     <div class="tab-pane" id="tab-2">
       <p class="c-section-label">📸 Photos & Videos</p>
       <p class="c-hint">Add photos, video files (.mp4), or YouTube links. Each gets a timestamp like "January 2024".</p>
+      
+      <!-- Drag and Drop Upload Zone inside edit panel -->
+      <div class="upload-zone-wrapper" style="margin-bottom: 1.2rem;">
+        <div class="upload-zone" id="upload-zone" style="border: 2px dashed var(--rose); background: var(--rose-lt); border-radius: 12px; padding: 1.5rem 1rem; cursor: pointer; text-align: center; transition: all 0.3s;">
+          <div id="upload-icon" style="font-size: 2rem; margin-bottom: 0.3rem;">📸</div>
+          <h4 id="upload-title" style="font-family: var(--serif); font-size: 1rem; color: var(--text); margin-bottom: 0.2rem;">Upload from Device</h4>
+          <p id="upload-desc" style="font-size: 0.75rem; color: var(--muted); margin-bottom: 0.8rem;">Drag & drop or click to upload</p>
+          <button class="gift-view-btn" style="margin-top: 0; padding: 0.35rem 1rem; font-size: 0.75rem; pointer-events: none;">Select Files</button>
+          <input type="file" id="file-upload-input" multiple accept="image/*,video/*" style="display: none;">
+        </div>
+      </div>
+
       <div id="gallery-items"></div>
       <div class="c-add-row">
-        <button class="c-add" onclick="addGalleryItem('image')">+ Photo</button>
-        <button class="c-add" onclick="addGalleryItem('video')">+ Video</button>
-        <button class="c-add" onclick="addGalleryItem('youtube')">+ YouTube</button>
+        <button class="c-add" onclick="addGalleryItem('image')">+ Add New Photo/Video Slot</button>
       </div>
     </div>
 
@@ -532,18 +596,48 @@ footer{background:linear-gradient(135deg,#fde8e8,#fdf3e3);border-top:1px solid v
       <p class="c-section-label">🌸 Gift 1 — Flowers</p>
       <div class="fg"><label>Title</label><input id="inp-g1t" type="text"></div>
       <div class="fg"><label>Description</label><textarea id="inp-g1d" rows="3"></textarea></div>
-      <div class="fg"><label>Bouquet Image URL</label><input id="inp-g1img" type="text" placeholder="https://images.unsplash.com/..."></div>
+      <div class="fg" style="margin-bottom: 0.8rem;">
+        <label>Bouquet Image</label>
+        <div style="display:flex; align-items:center; gap:0.8rem; flex-wrap:wrap;">
+          <div id="g1-preview-container">
+            <img id="g1-preview" src="" style="width:50px; height:50px; object-fit:cover; border-radius:6px; background:#eee; display:none;">
+            <div id="g1-no-preview" style="width:50px; height:50px; border-radius:6px; background:#f5ead8; border:1px dashed var(--gold); display:flex; align-items:center; justify-content:center; font-size:1.2rem;">🌸</div>
+          </div>
+          <button type="button" class="gift-view-btn" style="margin-top:0; padding:0.35rem 0.8rem; font-size:0.75rem;" onclick="document.getElementById('g1-file-input').click()">Upload Bouquet 📸</button>
+          <input type="file" id="g1-file-input" style="display:none;" accept="image/*" onchange="handleGiftUpload(1, this.files)">
+        </div>
+      </div>
       <hr class="c-divider">
       <p class="c-section-label">💎 Gift 2 — Earrings</p>
       <div class="fg"><label>Title</label><input id="inp-g2t" type="text"></div>
       <div class="fg"><label>Description</label><textarea id="inp-g2d" rows="3"></textarea></div>
-      <div class="fg"><label>Earrings Image URL</label><input id="inp-g2img" type="text" placeholder="https://images.unsplash.com/..."></div>
+      <div class="fg" style="margin-bottom: 0.8rem;">
+        <label>Earrings Image</label>
+        <div style="display:flex; align-items:center; gap:0.8rem; flex-wrap:wrap;">
+          <div id="g2-preview-container">
+            <img id="g2-preview" src="" style="width:50px; height:50px; object-fit:cover; border-radius:6px; background:#eee; display:none;">
+            <div id="g2-no-preview" style="width:50px; height:50px; border-radius:6px; background:#f5ead8; border:1px dashed var(--gold); display:flex; align-items:center; justify-content:center; font-size:1.2rem;">💎</div>
+          </div>
+          <button type="button" class="gift-view-btn" style="margin-top:0; padding:0.35rem 0.8rem; font-size:0.75rem;" onclick="document.getElementById('g2-file-input').click()">Upload Earrings 📸</button>
+          <input type="file" id="g2-file-input" style="display:none;" accept="image/*" onchange="handleGiftUpload(2, this.files)">
+        </div>
+      </div>
       <hr class="c-divider">
-      <p class="c-section-label">🎫 Gift 3 — Date Ticket & Trip Venue</p>
+      <p class="c-section-label">🎫 Gift 3 — Date Ticket & Venue</p>
       <div class="fg"><label>Title</label><input id="inp-g3t" type="text"></div>
       <div class="fg"><label>Description</label><textarea id="inp-g3d" rows="2"></textarea></div>
-      <div class="fg"><label>Trip Venue Name</label><input id="inp-g3ven" type="text"></div>
-      <div class="fg"><label>Venue Image URL</label><input id="inp-g3img" type="text" placeholder="https://images.unsplash.com/..."></div>
+      <div class="fg"><label>Date Venue Name</label><input id="inp-g3ven" type="text"></div>
+      <div class="fg" style="margin-bottom: 0.8rem;">
+        <label>Venue Image</label>
+        <div style="display:flex; align-items:center; gap:0.8rem; flex-wrap:wrap;">
+          <div id="g3-preview-container">
+            <img id="g3-preview" src="" style="width:50px; height:50px; object-fit:cover; border-radius:6px; background:#eee; display:none;">
+            <div id="g3-no-preview" style="width:50px; height:50px; border-radius:6px; background:#f5ead8; border:1px dashed var(--gold); display:flex; align-items:center; justify-content:center; font-size:1.2rem;">🎫</div>
+          </div>
+          <button type="button" class="gift-view-btn" style="margin-top:0; padding:0.35rem 0.8rem; font-size:0.75rem;" onclick="document.getElementById('g3-file-input').click()">Upload Venue 📸</button>
+          <input type="file" id="g3-file-input" style="display:none;" accept="image/*" onchange="handleGiftUpload(3, this.files)">
+        </div>
+      </div>
       <div class="fg"><label>Ticket Activity</label><input id="inp-tkt" type="text"></div>
       <div class="fg"><label>Ticket Details</label><input id="inp-tks" type="text"></div>
     </div>
@@ -553,32 +647,38 @@ footer{background:linear-gradient(135deg,#fde8e8,#fdf3e3);border-top:1px solid v
     <button class="confirm-btn" onclick="confirmAndShare()">✓ Save & Get Shareable Link</button>
     <div class="share-box" id="share-box">
       <p>Send this link to her ♥</p>
-      <div class="share-row">
-        <input type="text" id="share-input" readonly onclick="this.select()">
+      <div class="share-row" style="display: flex; gap: 0.45rem; flex-wrap: wrap;">
+        <input type="text" id="share-input" readonly onclick="this.select()" style="flex: 1; min-width: 150px;">
         <button class="copy-btn" id="copy-btn" onclick="copyLink()">Copy</button>
+        <a id="wa-share-btn" href="#" target="_blank" class="copy-btn" style="background: #25D366; color: #fff; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 0.3rem;">WhatsApp 💬</a>
+      </div>
+      <div style="margin-top: 0.6rem; text-align: center;">
+        <a id="share-link-clickable" href="#" target="_blank" style="font-size: 0.76rem; color: var(--rose-dk); font-weight: 600; text-decoration: underline; display: inline-block;">Open & Preview Link 🔗</a>
       </div>
     </div>
   </div>
 </div>
 
 <!-- ═══════════════════════════════════════
-     FLOATING MUSIC PLAYER
+     SPOTIFY MUSIC DRAWER
 ═══════════════════════════════════════ -->
-<div class="music-player">
-  <div class="p-viz" id="p-viz">
-    <div class="p-bar"></div><div class="p-bar"></div><div class="p-bar"></div>
-    <div class="p-bar"></div><div class="p-bar"></div>
+<button class="spotify-trigger" id="spotify-trigger" onclick="toggleSpotifyDrawer()">🎵 Our Playlist</button>
+
+<div class="spotify-drawer" id="spotify-drawer">
+  <div class="sd-head">
+    <h4>🌸 Our Playlist 🌸</h4>
+    <button class="sd-close" onclick="toggleSpotifyDrawer()">×</button>
   </div>
-  <div class="p-info">
-    <div class="p-name" id="p-name">Anniversary Song</div>
-    <div class="p-sub" id="p-sub">Tap ▶ to play ♥</div>
+  <select class="sd-select" id="spotify-select" onchange="changeSpotifyTrack(this.value)">
+    <option value="5Q58RkKyUafm15Syxg79DW">Sham — Aisha</option>
+    <option value="5pPyvA03RKSJrAnnDcq0nh">Saibo — Shor in the City</option>
+    <option value="0UYKuhzPMkvRQWO6luWBhI">Iktara (Male) — Wake Up Sid</option>
+    <option value="2NECp5Tvb5Lm6TbJf0Y8xI">Mera Yaar — Bhaag Milkha Bhaag</option>
+    <option value="6z5zRQHFEEBrvMkVjjCN8S">Yun Hi — Tanu Weds Manu</option>
+  </select>
+  <div class="sd-embed-container" id="spotify-embed-container">
+    <div style="font-size:0.75rem;color:var(--muted)">Select a song to load player...</div>
   </div>
-  <div class="p-controls">
-    <button class="p-btn" onclick="prevTrack()" title="Prev">&#9664;&#9664;</button>
-    <button class="p-btn big" id="p-play" onclick="togglePlay()" title="Play">&#9654;</button>
-    <button class="p-btn" onclick="nextTrack()" title="Next">&#9654;&#9654;</button>
-  </div>
-  <div class="p-dots" id="p-dots"></div>
 </div>
 
 <!-- ═══════════════════════════════════════
@@ -662,6 +762,7 @@ footer{background:linear-gradient(135deg,#fde8e8,#fdf3e3);border-top:1px solid v
       <h2 class="section-title">Beautiful <em>Moments</em></h2>
       <p class="section-desc">A collection of our favourite memories — photos and videos from across our year together.</p>
     </div>
+    
     <div class="gallery-masonry" id="gallery-grid"></div>
   </div>
 </section>
@@ -746,7 +847,7 @@ footer{background:linear-gradient(135deg,#fde8e8,#fdf3e3);border-top:1px solid v
             <div class="ticket-sub" id="ticket-sub"></div>
             <div style="font-size:.72rem;color:var(--muted);margin-top:.7rem;font-weight:600" id="ticket-val"></div>
           </div>
-          <button class="gift-view-btn" onclick="showGiftModal(3)">Reveal Trip Venue ✨</button>
+          <button class="gift-view-btn" onclick="showGiftModal(3)">Reveal Date Venue ✨</button>
         </div>
       </div>
 
@@ -766,7 +867,7 @@ footer{background:linear-gradient(135deg,#fde8e8,#fdf3e3);border-top:1px solid v
       <h3 id="gm-title">Gift Title</h3>
       <p id="gm-desc" style="margin-bottom:1rem">Gift Description</p>
       
-      <!-- Special Boarding Ticket Container for Trip Venue -->
+      <!-- Special Boarding Ticket Container for Date Venue -->
       <div id="gm-ticket-container" style="display:none;margin-top:1.2rem">
         <div class="gm-ticket">
           <div class="gm-ticket-header">BOARDING PASS • COUPLES ADVENTURE</div>
@@ -794,8 +895,77 @@ footer{background:linear-gradient(135deg,#fde8e8,#fdf3e3);border-top:1px solid v
         </div>
       </div>
     </div>
+    </div>
   </div>
 </div>
+
+<!-- PROGRESS CHECKLIST & NEXT COLLAGE SECTION -->
+<section id="progress-section" class="reveal" style="padding: 5rem 0; text-align: center; background: linear-gradient(135deg, rgba(224, 101, 109, 0.05), rgba(196, 154, 108, 0.05)); border-top: 1px dashed var(--gold-lt);">
+  <div class="container">
+    <div class="section-header" style="margin-bottom: 2rem;">
+      <div class="label">Our Story Checklist</div>
+      <h2 class="section-title">Ready for the <em>Grand Finale</em>?</h2>
+      <p class="section-desc">Open the envelope, pop all balloons, and unbox all gifts to unlock your custom memory video collage!</p>
+    </div>
+    
+    <div class="progress-checklist" style="display: inline-flex; flex-wrap: wrap; gap: 1.5rem; justify-content: center; margin-bottom: 2.5rem;">
+      <div class="checklist-item" id="chk-envelope" style="display: flex; align-items: center; gap: 0.5rem; background: #fff; padding: 0.6rem 1.2rem; border-radius: 50px; box-shadow: var(--sh); font-size: 0.88rem; font-weight: 600; border: 1px solid #eee;">
+        <span class="chk-status" style="color: #ccc;">○</span> Open Envelope ✉️
+      </div>
+      <div class="checklist-item" id="chk-balloons" style="display: flex; align-items: center; gap: 0.5rem; background: #fff; padding: 0.6rem 1.2rem; border-radius: 50px; box-shadow: var(--sh); font-size: 0.88rem; font-weight: 600; border: 1px solid #eee;">
+        <span class="chk-status" style="color: #ccc;">○</span> Pop Balloons 🎈
+      </div>
+      <div class="checklist-item" id="chk-gifts" style="display: flex; align-items: center; gap: 0.5rem; background: #fff; padding: 0.6rem 1.2rem; border-radius: 50px; box-shadow: var(--sh); font-size: 0.88rem; font-weight: 600; border: 1px solid #eee;">
+        <span class="chk-status" style="color: #ccc;">○</span> Unbox Gifts 🎁
+      </div>
+    </div>
+    
+    <div>
+      <button id="btn-next-collage" class="confirm-btn" style="max-width: 360px; margin: 0 auto; display: flex; align-items: center; justify-content: center; gap: 0.5rem; opacity: 0.65; cursor: not-allowed;" onclick="checkAndCreateCollage()">
+        <span>Next: Create Our Memory Collage 🎬</span>
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- Collage Generator Modal -->
+<div class="gift-modal" id="collage-modal" onclick="if(event.target===this) closeCollageModal()">
+  <div class="gift-modal-content" style="max-width: 700px; width: 95%; padding: 2rem;">
+    <button class="gift-modal-close" onclick="closeCollageModal()">×</button>
+    
+    <div id="collage-gen-view" style="text-align: center; padding: 3rem 1rem;">
+      <div style="font-size: 3.5rem; margin-bottom: 1.5rem; animation: pulse 1.5s ease-in-out infinite;">🎬</div>
+      <h3 style="font-family: var(--serif); font-size: 1.8rem; color: var(--text); margin-bottom: 0.8rem;">Creating Your Memory Collage</h3>
+      <p style="font-size: 0.95rem; color: var(--muted); margin-bottom: 2rem; max-width: 500px; margin-left: auto; margin-right: auto;">
+        We are weaving your photos and videos into a beautiful custom collage video, set to your background song. Please wait a moment...
+      </p>
+      
+      <!-- Progress Bar -->
+      <div style="width: 100%; max-width: 400px; background: #eee; height: 10px; border-radius: 10px; margin: 0 auto 1rem; overflow: hidden; position: relative;">
+        <div id="collage-progress-bar" style="width: 0%; height: 100%; background: linear-gradient(90deg, var(--rose), var(--rose-dk)); transition: width 0.1s linear;"></div>
+      </div>
+      <div id="collage-progress-text" style="font-size: 0.82rem; font-weight: 700; color: var(--rose-dk);">0% Complete</div>
+    </div>
+    
+    <div id="collage-result-view" style="display: none; text-align: center;">
+      <div class="gm-badge" style="background: rgba(224,101,109,0.1); color: var(--rose-dk); margin-bottom: 1rem;">✨ Your Masterpiece is Ready ✨</div>
+      <h3 style="font-family: var(--serif); font-size: 1.8rem; color: var(--text); margin-bottom: 0.8rem;">Our Memory Collage</h3>
+      
+      <!-- Video Player -->
+      <div style="width: 100%; aspect-ratio: 16/9; background: #000; border-radius: 14px; overflow: hidden; margin-bottom: 1.5rem; box-shadow: var(--sh);">
+        <video id="collage-video" controls style="width: 100%; height: 100%; object-fit: contain;"></video>
+      </div>
+      
+      <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+        <a id="collage-download-btn" href="#" download="our_anniversary_collage.webm" class="confirm-btn" style="width: auto; padding: 0.7rem 2rem; display: inline-flex; align-items: center; gap: 0.5rem; text-decoration: none;">
+          <span>Download Video 💾</span>
+        </a>
+        <button class="gift-view-btn" style="margin-top: 0; padding: 0.7rem 2rem; background: #eee; color: var(--text); box-shadow: none;" onclick="closeCollageModal()">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 </div>
 
 <footer>
@@ -863,31 +1033,48 @@ let state = {
 };
 
 // ═══════════════════════════════════════════════════
-// MUSIC PLAYER — 5 built-in tracks
+// SPOTIFY PLAYER DRAWER LOGIC
 // ═══════════════════════════════════════════════════
-const TRACKS=[
-  {name:"Anniversary Song",desc:"Auto-play ♥",notes:[349.23,440,523.25,698.46,659.25,523.25,440,349.23,392,440,523.25,659.25],ms:460,type:'triangle',gain:.065},
-  {name:"Sweet Romance",desc:"Soft & gentle",notes:[261.63,329.63,392,523.25,493.88,440,392,329.63,261.63,329.63,523.25,659.25],ms:560,type:'sine',gain:.07},
-  {name:"Heartbeat",desc:"Warm & rhythmic",notes:[392,493.88,587.33,783.99,740,659.25,587.33,493.88,392,493.88,587.33,783.99],ms:390,type:'sine',gain:.06},
-  {name:"Starry Night",desc:"Dreamy & soft",notes:[440,523.25,659.25,880,783.99,698.46,659.25,523.25,440,523.25,659.25,880],ms:520,type:'triangle',gain:.055},
-  {name:"Forever",desc:"Warm & full",notes:[293.66,369.99,440,587.33,554.37,493.88,440,369.99,293.66,369.99,440,587.33],ms:490,type:'triangle',gain:.068}
-];
+let spotifyDrawerOpen = false;
+let currentSpotifyTrackId = '6z5zRQHFEEBrvMkVjjCN8S'; // Default to Yun Hi
 
-let audioCtx=null,musicTimer=null,isPlaying=false,currentTrack=0,noteIdx=0;
+function toggleSpotifyDrawer() {
+  const drawer = document.getElementById('spotify-drawer');
+  spotifyDrawerOpen = !spotifyDrawerOpen;
+  if (spotifyDrawerOpen) {
+    drawer.classList.add('open');
+    if (!document.getElementById('spotify-iframe')) {
+      changeSpotifyTrack(currentSpotifyTrackId);
+    }
+  } else {
+    drawer.classList.remove('open');
+  }
+}
 
-function getCtx(){if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();return audioCtx;}
+function changeSpotifyTrack(trackId) {
+  currentSpotifyTrackId = trackId;
+  const container = document.getElementById('spotify-embed-container');
+  container.innerHTML = `
+    <iframe id="spotify-iframe" style="border-radius:12px" 
+      src="https://open.spotify.com/embed/track/${trackId}?utm_source=generator" 
+      width="100%" height="152" frameBorder="0" allowfullscreen="" 
+      allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" 
+      loading="lazy">
+    </iframe>
+  `;
+  const select = document.getElementById('spotify-select');
+  if (select && select.value !== trackId) {
+    select.value = trackId;
+  }
+}
 
-function playNote(freq,t){
-  try{
-    const c=getCtx(),osc=c.createOscillator(),gain=c.createGain(),filt=c.createBiquadFilter();
-    osc.connect(filt);filt.connect(gain);gain.connect(c.destination);
-    osc.type=t.type;osc.frequency.setValueAtTime(freq,c.currentTime);
-    filt.type='lowpass';filt.frequency.setValueAtTime(2000,c.currentTime);
-    gain.gain.setValueAtTime(0,c.currentTime);
-    gain.gain.linearRampToValueAtTime(t.gain,c.currentTime+.03);
-    gain.gain.exponentialRampToValueAtTime(.001,c.currentTime+1.8);
-    osc.start();osc.stop(c.currentTime+2);
-  }catch(e){}
+// Keep AudioContext for pop and sparkle sounds only
+let audioCtx=null;
+function getCtx(){
+  if(!audioCtx) {
+    audioCtx=new(window.AudioContext||window.webkitAudioContext)();
+  }
+  return audioCtx;
 }
 
 function playPopSound(){
@@ -901,69 +1088,23 @@ function playPopSound(){
   }catch(e){}
 }
 
-function startMusic(){
-  if(musicTimer)clearTimeout(musicTimer);
-  const t=TRACKS[currentTrack];
-  function tick(){
-    if(!isPlaying)return;
-    playNote(t.notes[noteIdx],t);
-    noteIdx=(noteIdx+1)%t.notes.length;
-    musicTimer=setTimeout(tick,t.ms);
-  }
-  tick();
-}
-
-function stopMusic(){if(musicTimer){clearTimeout(musicTimer);musicTimer=null;}}
-
-function togglePlay(){
-  const btn=document.getElementById('p-play'),viz=document.getElementById('p-viz');
-  if(isPlaying){
-    isPlaying=false;stopMusic();
-    btn.innerHTML='&#9654;';viz.classList.remove('playing');
-    document.getElementById('p-sub').textContent=TRACKS[currentTrack].desc;
-  }else{
-    isPlaying=true;startMusic();
-    btn.innerHTML='&#9646;&#9646;';viz.classList.add('playing');
-    document.getElementById('p-sub').textContent='Now playing ♥';
-  }
-}
-
-function setTrack(idx){
-  const was=isPlaying;
-  if(was){isPlaying=false;stopMusic();}
-  currentTrack=idx;noteIdx=0;
-  document.getElementById('p-name').textContent=TRACKS[idx].name;
-  document.getElementById('p-sub').textContent=was?'Now playing ♥':TRACKS[idx].desc;
-  document.querySelectorAll('.p-dot').forEach((d,i)=>d.classList.toggle('active',i===idx));
-  if(was){isPlaying=true;startMusic();}
-}
-
-function prevTrack(){setTrack((currentTrack-1+TRACKS.length)%TRACKS.length);}
-function nextTrack(){setTrack((currentTrack+1)%TRACKS.length);}
-
-function buildDots(){
-  const c=document.getElementById('p-dots');c.innerHTML='';
-  TRACKS.forEach((t,i)=>{
-    const b=document.createElement('button');
-    b.className='p-dot'+(i===0?' active':'');b.title=t.name;
-    b.onclick=()=>setTrack(i);c.appendChild(b);
-  });
-}
-
-// Auto-play on first interaction
-function initAutoPlay(){
-  const h=()=>{
-    if(!isPlaying){
-      isPlaying=true;startMusic();
-      document.getElementById('p-play').innerHTML='&#9646;&#9646;';
-      document.getElementById('p-viz').classList.add('playing');
-      document.getElementById('p-sub').textContent='Now playing ♥';
-    }
-    document.removeEventListener('click',h);
-    document.removeEventListener('touchstart',h);
-  };
-  document.addEventListener('click',h);
-  document.addEventListener('touchstart',h);
+function playSparkleSound(){
+  try{
+    const c=getCtx();
+    const now=c.currentTime;
+    const freqs=[523.25, 659.25, 783.99, 1046.50];
+    freqs.forEach((freq, idx)=>{
+      const osc=c.createOscillator(),g=c.createGain();
+      osc.connect(g);g.connect(c.destination);
+      osc.type='sine';
+      osc.frequency.setValueAtTime(freq, now + idx * 0.08);
+      g.gain.setValueAtTime(0, now + idx * 0.08);
+      g.gain.linearRampToValueAtTime(0.08, now + idx * 0.08 + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.08 + 0.3);
+      osc.start(now + idx * 0.08);
+      osc.stop(now + idx * 0.08 + 0.4);
+    });
+  }catch(e){}
 }
 
 // ═══════════════════════════════════════════════════
@@ -985,7 +1126,7 @@ animCv();
 // ═══════════════════════════════════════════════════
 // ENVELOPE
 // ═══════════════════════════════════════════════════
-function toggleEnvelope(el){el.classList.toggle('open');}
+function toggleEnvelope(el){el.classList.toggle('open'); if (typeof updateProgress === 'function') updateProgress();}
 
 // ═══════════════════════════════════════════════════
 // BALLOON GAME
@@ -1070,6 +1211,7 @@ function popBalloon(wrap,color,cx2,cy2,stel){
   wrap.remove();if(stel)stel.remove();
   activeBalloons=activeBalloons.filter(b=>b!==wrap);
   poppedCount++;poppedEl.textContent=poppedCount;
+  if (typeof updateProgress === 'function') updateProgress();
   if(poppedCount>=state.balloonMessages.length){
     clearInterval(spawnTimer);statusEl.textContent='🎉 All found!';
     activeBalloons.forEach(b=>b.remove());activeBalloons=[];
@@ -1117,7 +1259,10 @@ function renderGallery(){
 // ═══════════════════════════════════════════════════
 // GIFTS
 // ═══════════════════════════════════════════════════
+let giftsOpened = { 1: false, 2: false, 3: false };
 function openGift(n){
+  giftsOpened[n] = true;
+  if (typeof updateProgress === 'function') updateProgress();
   const c=document.getElementById(`gift-card-${n}`);
   if(!c.classList.contains('opened')){
     c.classList.add('opened');
@@ -1154,7 +1299,7 @@ function showGiftModal(n){
     img.src=state.gifts.earrings.image || "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?q=80&w=1000";
     ticketCont.style.display='none';
   }else if(n===3){
-    badge.textContent="Gift 🎫 Trip Ticket";
+    badge.textContent="Gift 🎫 Date Ticket";
     badge.style.background="rgba(224,101,109,0.1)";
     badge.style.color="var(--rose-dk)";
     title.textContent=state.gifts.date.title;
@@ -1244,16 +1389,14 @@ function populateInputs(){
   document.getElementById('inp-pname').value=state.partnerName;
   document.getElementById('inp-g1t').value=state.gifts.flowers.title;
   document.getElementById('inp-g1d').value=state.gifts.flowers.description;
-  document.getElementById('inp-g1img').value=state.gifts.flowers.image || '';
   document.getElementById('inp-g2t').value=state.gifts.earrings.title;
   document.getElementById('inp-g2d').value=state.gifts.earrings.description;
-  document.getElementById('inp-g2img').value=state.gifts.earrings.image || '';
   document.getElementById('inp-g3t').value=state.gifts.date.title;
   document.getElementById('inp-g3d').value=state.gifts.date.description;
   document.getElementById('inp-g3ven').value=state.gifts.date.venue || '';
-  document.getElementById('inp-g3img').value=state.gifts.date.image || '';
   document.getElementById('inp-tkt').value=state.gifts.date.ticketTitle;
   document.getElementById('inp-tks').value=state.gifts.date.ticketDetails;
+  if (typeof updateGiftPreviews === 'function') updateGiftPreviews();
   renderBalloonInputs();
   renderGalleryInputs();
 }
@@ -1289,16 +1432,55 @@ function renderGalleryInputs(){
   const c=document.getElementById('gallery-items');c.innerHTML='';
   state.galleryItems.forEach((item,i)=>{
     const d=document.createElement('div');d.className='c-item';
-    const tl=item.type==='youtube'?'🎬 YouTube':item.type==='video'?'🎥 Video':'🖼️ Photo';
-    const ph=item.type==='youtube'?'YouTube link':item.type==='video'?'Video URL (.mp4)':'Image URL';
+    const isLocal = item.url && item.url.startsWith('blob:');
+    const tl=item.type==='youtube'?'🎬 YouTube':item.type==='video'?(isLocal?'🎥 Local Video':'🎥 Video'):(isLocal?'🖼️ Local Photo':'🖼️ Photo');
+    
+    let previewHtml = '';
+    if (item.url) {
+      if (item.type === 'video') {
+        previewHtml = `<video src="${item.url}" style="width:50px; height:50px; object-fit:cover; border-radius:6px; background:#000; display:block; margin-bottom:0.5rem;"></video>`;
+      } else {
+        previewHtml = `<img src="${item.url}" style="width:50px; height:50px; object-fit:cover; border-radius:6px; background:#eee; display:block; margin-bottom:0.5rem;">`;
+      }
+    } else {
+      previewHtml = `<div style="width:50px; height:50px; border-radius:6px; background:#f5ead8; border:1px dashed var(--gold); display:flex; align-items:center; justify-content:center; font-size:1.2rem; margin-bottom:0.5rem;">❓</div>`;
+    }
+    
     d.innerHTML=`
       <button class="c-remove" onclick="removeGalleryItem(${i})">×</button>
       <div style="font-size:.72rem;font-weight:700;color:var(--rose-dk);margin-bottom:.6rem;padding-right:1.5rem">${tl}</div>
-      <div class="fg"><label>URL</label><input type="text" class="g-url" data-i="${i}" value="${item.url}" placeholder="${ph}"></div>
+      <div class="fg" style="margin-bottom:0.8rem;">
+        <label>Media File</label>
+        <div style="display:flex; align-items:center; gap:0.8rem; flex-wrap:wrap;">
+          ${previewHtml}
+          <button type="button" class="gift-view-btn" style="margin-top:0; padding:0.35rem 0.8rem; font-size:0.75rem;" onclick="document.getElementById('slot-file-input-${i}').click()">
+            ${item.url ? 'Change File 🔄' : 'Upload File 📸'}
+          </button>
+          <input type="file" id="slot-file-input-${i}" style="display:none;" accept="image/*,video/*" onchange="handleSlotUpload(${i}, this.files)">
+        </div>
+      </div>
       <div class="fg"><label>Caption</label><input type="text" class="g-cap" data-i="${i}" value="${item.caption||''}"></div>
       <div class="fg" style="margin-bottom:0"><label>Timestamp (e.g. "January 2024")</label><input type="text" class="g-ts" data-i="${i}" value="${item.timestamp||''}"></div>`;
     c.appendChild(d);
   });
+}
+
+async function handleSlotUpload(index, files) {
+  if (!files || files.length === 0) return;
+  const file = files[0];
+  try {
+    const localId = await saveMoment(file);
+    const objectUrl = URL.createObjectURL(file);
+    
+    state.galleryItems[index].url = objectUrl;
+    state.galleryItems[index].type = file.type.startsWith('video') ? 'video' : 'image';
+    state.galleryItems[index].localId = localId;
+    
+    renderGalleryInputs();
+    renderGallery();
+  } catch (err) {
+    console.error("Error saving slot file:", err);
+  }
 }
 
 function addGalleryItem(type){
@@ -1307,6 +1489,10 @@ function addGalleryItem(type){
 }
 
 function removeGalleryItem(i){
+  const item = state.galleryItems[i];
+  if (item && item.localId && typeof deleteMoment === 'function') {
+    deleteMoment(item.localId).catch(err => console.warn("Failed to delete from IndexedDB:", err));
+  }
   state.galleryItems.splice(i,1);
   renderGalleryInputs();renderGallery();
 }
@@ -1322,21 +1508,14 @@ function readInputs(){
   state.partnerName=document.getElementById('inp-pname').value;
   state.gifts.flowers.title=document.getElementById('inp-g1t').value;
   state.gifts.flowers.description=document.getElementById('inp-g1d').value;
-  state.gifts.flowers.image=document.getElementById('inp-g1img').value;
   state.gifts.earrings.title=document.getElementById('inp-g2t').value;
   state.gifts.earrings.description=document.getElementById('inp-g2d').value;
-  state.gifts.earrings.image=document.getElementById('inp-g2img').value;
   state.gifts.date.title=document.getElementById('inp-g3t').value;
   state.gifts.date.description=document.getElementById('inp-g3d').value;
   state.gifts.date.venue=document.getElementById('inp-g3ven').value;
-  state.gifts.date.image=document.getElementById('inp-g3img').value;
   state.gifts.date.ticketTitle=document.getElementById('inp-tkt').value;
   state.gifts.date.ticketDetails=document.getElementById('inp-tks').value;
   document.querySelectorAll('.b-inp').forEach(el=>{const i=parseInt(el.dataset.i);state.balloonMessages[i]=el.value;});
-  document.querySelectorAll('.g-url').forEach(el=>{
-    const i=parseInt(el.dataset.i);state.galleryItems[i].url=el.value;
-    if(getYtId(el.value))state.galleryItems[i].type='youtube';
-  });
   document.querySelectorAll('.g-cap').forEach(el=>{const i=parseInt(el.dataset.i);state.galleryItems[i].caption=el.value;});
   document.querySelectorAll('.g-ts').forEach(el=>{const i=parseInt(el.dataset.i);state.galleryItems[i].timestamp=el.value;});
 }
@@ -1350,6 +1529,16 @@ function confirmAndShare(){
     const b64=btoa(bin);
     const url=window.location.origin+window.location.pathname+'#data='+encodeURIComponent(b64);
     document.getElementById('share-input').value=url;
+    const clickLink = document.getElementById('share-link-clickable');
+    if (clickLink) clickLink.href = url;
+    
+    // Set WhatsApp Share Link
+    const waBtn = document.getElementById('wa-share-btn');
+    if (waBtn) {
+      const shareText = encodeURIComponent(`Happy Anniversary, My Love! ♥ Look at the page I made for us: ${url}`);
+      waBtn.href = `https://api.whatsapp.com/send?text=${shareText}`;
+    }
+    
     document.getElementById('share-box').style.display='block';
     document.getElementById('copy-btn').textContent='Copy';
   }catch(e){alert('Could not generate link.');}
@@ -1387,15 +1576,751 @@ function setupReveal(){
 }
 
 // ═══════════════════════════════════════════════════
+// GIFT DEVICE UPLOADER LOGIC
+// ═══════════════════════════════════════════════════
+async function handleGiftUpload(n, files) {
+  if (!files || files.length === 0) return;
+  const file = files[0];
+  try {
+    const localId = await saveMoment(file);
+    const objectUrl = URL.createObjectURL(file);
+    
+    if (n === 1) {
+      state.gifts.flowers.image = objectUrl;
+      state.gifts.flowers.localId = localId;
+    } else if (n === 2) {
+      state.gifts.earrings.image = objectUrl;
+      state.gifts.earrings.localId = localId;
+    } else if (n === 3) {
+      state.gifts.date.image = objectUrl;
+      state.gifts.date.localId = localId;
+    }
+    
+    updateGiftPreviews();
+    renderDom();
+  } catch (err) {
+    console.error("Error saving gift file:", err);
+  }
+}
+
+function updateGiftPreviews() {
+  const p1 = document.getElementById('g1-preview');
+  const np1 = document.getElementById('g1-no-preview');
+  if (p1 && np1) {
+    if (state.gifts.flowers.image) {
+      p1.src = state.gifts.flowers.image;
+      p1.style.display = 'block';
+      np1.style.display = 'none';
+    } else {
+      p1.style.display = 'none';
+      np1.style.display = 'flex';
+    }
+  }
+
+  const p2 = document.getElementById('g2-preview');
+  const np2 = document.getElementById('g2-no-preview');
+  if (p2 && np2) {
+    if (state.gifts.earrings.image) {
+      p2.src = state.gifts.earrings.image;
+      p2.style.display = 'block';
+      np2.style.display = 'none';
+    } else {
+      p2.style.display = 'none';
+      np2.style.display = 'flex';
+    }
+  }
+
+  const p3 = document.getElementById('g3-preview');
+  const np3 = document.getElementById('g3-no-preview');
+  if (p3 && np3) {
+    if (state.gifts.date.image) {
+      p3.src = state.gifts.date.image;
+      p3.style.display = 'block';
+      np3.style.display = 'none';
+    } else {
+      p3.style.display = 'none';
+      np3.style.display = 'flex';
+    }
+  }
+}
+
+// ═══════════════════════════════════════════════════
+// INDEXEDDB PERSISTENCE
+// ═══════════════════════════════════════════════════
+const DB_NAME = 'AnniversaryMomentsDB';
+const STORE_NAME = 'moments';
+
+function initDB() {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open(DB_NAME, 1);
+    request.onupgradeneeded = (e) => {
+      const db = e.target.result;
+      if (!db.objectStoreNames.contains(STORE_NAME)) {
+        db.createObjectStore(STORE_NAME, { keyPath: 'id', autoIncrement: true });
+      }
+    };
+    request.onsuccess = (e) => resolve(e.target.result);
+    request.onerror = (e) => reject(e.target.error);
+  });
+}
+
+function saveMoment(file, caption, timestamp) {
+  return initDB().then(db => {
+    return new Promise((resolve, reject) => {
+      const transaction = db.transaction(STORE_NAME, 'readwrite');
+      const store = transaction.objectStore(STORE_NAME);
+      const record = {
+        name: file.name,
+        type: file.type.startsWith('video') ? 'video' : 'image',
+        data: file, // File object is directly serializable/storable in IndexedDB!
+        caption: caption || file.name.split('.')[0],
+        timestamp: timestamp || new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
+        addedAt: Date.now()
+      };
+      const req = store.add(record);
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => reject(req.target.error);
+    });
+  });
+}
+
+function loadMoments() {
+  return initDB().then(db => {
+    return new Promise((resolve, reject) => {
+      const transaction = db.transaction(STORE_NAME, 'readonly');
+      const store = transaction.objectStore(STORE_NAME);
+      const req = store.getAll();
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => reject(req.target.error);
+    });
+  });
+}
+
+function deleteMoment(id) {
+  return initDB().then(db => {
+    return new Promise((resolve, reject) => {
+      const transaction = db.transaction(STORE_NAME, 'readwrite');
+      const store = transaction.objectStore(STORE_NAME);
+      const req = store.delete(id);
+      req.onsuccess = () => resolve();
+      req.onerror = () => reject(req.target.error);
+    });
+  });
+}
+
+// ═══════════════════════════════════════════════════
+// FILE UPLOAD ZONE LOGIC
+// ═══════════════════════════════════════════════════
+function initUpload() {
+  const input = document.getElementById('file-upload-input');
+  const zone = document.getElementById('upload-zone');
+  
+  if (!input || !zone) return;
+  
+  zone.addEventListener('click', () => {
+    input.click();
+  });
+  
+  // Drag and drop
+  zone.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    zone.classList.add('upload-zone-active');
+  });
+  
+  zone.addEventListener('dragleave', () => {
+    zone.classList.remove('upload-zone-active');
+  });
+  
+  zone.addEventListener('drop', async (e) => {
+    e.preventDefault();
+    zone.classList.remove('upload-zone-active');
+    const files = e.dataTransfer.files;
+    if (files && files.length > 0) {
+      await handleFiles(files);
+    }
+  });
+  
+  input.addEventListener('change', async (e) => {
+    const files = e.target.files;
+    if (files && files.length > 0) {
+      await handleFiles(files);
+    }
+  });
+}
+
+async function handleFiles(files) {
+  const icon = document.getElementById('upload-icon');
+  const title = document.getElementById('upload-title');
+  const desc = document.getElementById('upload-desc');
+  
+  if (!icon || !title || !desc) return;
+  
+  const originalIcon = icon.textContent;
+  const originalTitle = title.textContent;
+  const originalDesc = desc.textContent;
+  
+  icon.style.animation = 'pulse 1s infinite';
+  icon.textContent = '⏳';
+  title.textContent = 'Processing Uploads...';
+  desc.textContent = 'Saving memories to your device storage...';
+  
+  for (let i = 0; i < files.length; i++) {
+    const file = files[i];
+    try {
+      const localId = await saveMoment(file);
+      const objectUrl = URL.createObjectURL(file);
+      
+      state.galleryItems.push({
+        type: file.type.startsWith('video') ? 'video' : 'image',
+        url: objectUrl,
+        caption: file.name.split('.')[0],
+        timestamp: new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
+        localId: localId
+      });
+    } catch (err) {
+      console.error("Error saving file:", err);
+    }
+  }
+  
+  renderGallery();
+  populateInputs();
+  
+  icon.style.animation = 'none';
+  icon.textContent = originalIcon;
+  title.textContent = originalTitle;
+  desc.textContent = originalDesc;
+}
+
+// ═══════════════════════════════════════════════════
+// PROGRESS CHECKLIST LOGIC
+// ═══════════════════════════════════════════════════
+let progress = {
+  envelope: false,
+  balloons: false,
+  gifts: false
+};
+
+function updateProgress() {
+  const env = document.getElementById('envelope-wrap');
+  if (env && env.classList.contains('open')) {
+    progress.envelope = true;
+  }
+  
+  if (poppedCount >= state.balloonMessages.length && state.balloonMessages.length > 0) {
+    progress.balloons = true;
+  }
+  
+  if (giftsOpened[1] && giftsOpened[2] && giftsOpened[3]) {
+    progress.gifts = true;
+  }
+  
+  const chkEnv = document.getElementById('chk-envelope');
+  const chkBalloons = document.getElementById('chk-balloons');
+  const chkGifts = document.getElementById('chk-gifts');
+  
+  if (chkEnv) {
+    chkEnv.querySelector('.chk-status').textContent = progress.envelope ? '✓' : '○';
+    chkEnv.style.color = progress.envelope ? 'var(--rose-dk)' : 'var(--muted)';
+    chkEnv.style.borderColor = progress.envelope ? 'var(--rose)' : '#eee';
+    chkEnv.style.background = progress.envelope ? 'var(--rose-lt)' : '#fff';
+  }
+  
+  if (chkBalloons) {
+    chkBalloons.querySelector('.chk-status').textContent = progress.balloons ? '✓' : '○';
+    chkBalloons.style.color = progress.balloons ? 'var(--rose-dk)' : 'var(--muted)';
+    chkBalloons.style.borderColor = progress.balloons ? 'var(--rose)' : '#eee';
+    chkBalloons.style.background = progress.balloons ? 'var(--rose-lt)' : '#fff';
+  }
+  
+  if (chkGifts) {
+    chkGifts.querySelector('.chk-status').textContent = progress.gifts ? '✓' : '○';
+    chkGifts.style.color = progress.gifts ? 'var(--rose-dk)' : 'var(--muted)';
+    chkGifts.style.borderColor = progress.gifts ? 'var(--rose)' : '#eee';
+    chkGifts.style.background = progress.gifts ? 'var(--rose-lt)' : '#fff';
+  }
+  
+  const btn = document.getElementById('btn-next-collage');
+  if (btn) {
+    const allDone = progress.envelope && progress.balloons && progress.gifts;
+    if (allDone) {
+      btn.style.opacity = '1';
+      btn.style.cursor = 'pointer';
+      btn.classList.add('unlocked');
+    } else {
+      btn.style.opacity = '0.65';
+      btn.style.cursor = 'not-allowed';
+      btn.classList.remove('unlocked');
+    }
+  }
+}
+
+function checkAndCreateCollage() {
+  const allDone = progress.envelope && progress.balloons && progress.gifts;
+  if (!allDone) {
+    if (confirm("❤️ You haven't covered all sections yet! We recommend checking everything out first. Would you like to create the collage anyway? ✨")) {
+      openCollageModal();
+    }
+  } else {
+    openCollageModal();
+  }
+}
+
+// ═══════════════════════════════════════════════════
+// COLLAGE GENERATION & RECORDING
+// ═══════════════════════════════════════════════════
+let isCollageRunning = false;
+let collageRecorder = null;
+let recordedChunks = [];
+let collageCanvas = null;
+let collageCtx = null;
+let collageAnimationId = null;
+let hearts = [];
+
+function drawImageProp(ctx, img, x, y, w, h, offsetX, offsetY, scaleFactor) {
+  if (arguments.length < 5) {
+    w = ctx.canvas.width;
+    h = ctx.canvas.height;
+  }
+  x = x || 0;
+  y = y || 0;
+  offsetX = typeof offsetX === "number" ? offsetX : 0.5;
+  offsetY = typeof offsetY === "number" ? offsetY : 0.5;
+  scaleFactor = scaleFactor || 1;
+
+  let iw = img.width || img.videoWidth;
+  let ih = img.height || img.videoHeight;
+  if (!iw || !ih) return;
+  let r = Math.min(w / iw, h / ih);
+  let nw = iw * r * scaleFactor;
+  let nh = ih * r * scaleFactor;
+  let cx, cy, cw, ch;
+
+  if (nw < w) { nw = w * scaleFactor; nh = ih * (w / iw) * scaleFactor; }
+  if (nh < h) { nh = h * scaleFactor; nw = iw * (h / ih) * scaleFactor; }
+
+  cw = iw / (nw / w);
+  ch = ih / (nh / h);
+
+  cx = (iw - cw) * offsetX;
+  cy = (ih - ch) * offsetY;
+
+  if (cx < 0) cx = 0;
+  if (cy < 0) cy = 0;
+  if (cw > iw) cw = iw;
+  if (ch > ih) ch = ih;
+
+  ctx.drawImage(img, cx, cy, cw, ch, x, y, w, h);
+}
+
+function preloadMedia(item) {
+  return new Promise((resolve) => {
+    if (item.type === 'video' || (item.url.startsWith('blob:') && item.type === 'video')) {
+      const video = document.createElement('video');
+      video.src = item.url;
+      video.crossOrigin = 'anonymous';
+      video.muted = true;
+      video.playsInline = true;
+      video.preload = 'auto';
+      video.onloadedmetadata = () => {
+        resolve({ type: 'video', element: video, item });
+      };
+      video.onerror = () => {
+        resolve(null);
+      };
+    } else {
+      const img = new Image();
+      img.src = item.url;
+      img.crossOrigin = 'anonymous';
+      img.onload = () => {
+        resolve({ type: 'image', element: img, item });
+      };
+      img.onerror = () => {
+        resolve(null);
+      };
+    }
+  });
+}
+
+function updateAndDrawHearts(ctx, delta) {
+  if (Math.random() < 0.08 && hearts.length < 25) {
+    hearts.push({
+      x: Math.random() * 1280,
+      y: 740,
+      size: Math.random() * 24 + 16,
+      speed: Math.random() * 90 + 60,
+      wobble: Math.random() * 2.5,
+      wobbleSpeed: Math.random() * 4 + 1.5,
+      opacity: Math.random() * 0.6 + 0.3,
+      age: 0
+    });
+  }
+  
+  hearts.forEach((h) => {
+    h.y -= h.speed * (delta / 1000);
+    h.age += delta / 1000;
+    const xOffset = Math.sin(h.age * h.wobbleSpeed) * h.wobble * 15;
+    
+    ctx.save();
+    ctx.globalAlpha = h.opacity * (1 - (720 - h.y) / 720);
+    ctx.font = `${h.size}px Arial`;
+    ctx.fillText('❤️', h.x + xOffset, h.y);
+    ctx.restore();
+  });
+  
+  hearts = hearts.filter(h => h.y > -50);
+}
+
+async function openCollageModal() {
+  const items = state.galleryItems;
+  if (!items || items.length === 0) {
+    alert("❤️ Please upload or add some photos or videos first to create a collage!");
+    return;
+  }
+  
+  const modal = document.getElementById('collage-modal');
+  modal.classList.add('show');
+  
+  document.getElementById('collage-gen-view').style.display = 'block';
+  document.getElementById('collage-result-view').style.display = 'none';
+  
+  try {
+    await startCollageGeneration();
+  } catch (err) {
+    console.error("Collage generation failed:", err);
+    alert("Could not generate video: " + err.message);
+    closeCollageModal();
+  }
+}
+
+function closeCollageModal() {
+  stopCollageGeneration();
+  document.getElementById('collage-modal').classList.remove('show');
+  const video = document.getElementById('collage-video');
+  if (video) {
+    video.pause();
+    video.src = '';
+  }
+}
+
+async function startCollageGeneration() {
+  isCollageRunning = true;
+  recordedChunks = [];
+  
+  const progressBar = document.getElementById('collage-progress-bar');
+  const progressText = document.getElementById('collage-progress-text');
+  
+  progressBar.style.width = '0%';
+  progressText.textContent = 'Preloading images & videos...';
+  
+  const preloaded = [];
+  const items = state.galleryItems.filter(item => item.url && item.type !== 'youtube'); // Skip youtube embeds in collage
+  
+  if (items.length === 0) {
+    throw new Error("No direct photos or video files found. Please upload some files first!");
+  }
+
+  for (let i = 0; i < items.length; i++) {
+    progressBar.style.width = `${Math.round((i / items.length) * 30)}%`;
+    progressText.textContent = `Preloading media ${i+1}/${items.length}...`;
+    const media = await preloadMedia(items[i]);
+    if (media) {
+      preloaded.push(media);
+    }
+  }
+  
+  if (preloaded.length === 0) {
+    throw new Error("None of the photos or videos could be preloaded. Please check file access.");
+  }
+  
+  collageCanvas = document.createElement('canvas');
+  collageCanvas.width = 1280;
+  collageCanvas.height = 720;
+  collageCtx = collageCanvas.getContext('2d');
+  
+  const canvasStream = collageCanvas.captureStream(30);
+  const combinedStream = new MediaStream();
+  combinedStream.addTrack(canvasStream.getVideoTracks()[0]);
+
+  const musicCtx = new (window.AudioContext || window.webkitAudioContext)();
+  const audioDest = musicCtx.createMediaStreamDestination();
+  combinedStream.addTrack(audioDest.stream.getAudioTracks()[0]);
+
+  const NOTES = [293.66,349.23,392,440,493.88,523.25,493.88,440,392,349.23,329.63,293.66];
+  const NOTE_DUR = 0.55;
+  let collageNoteIdx = 0;
+  let collageMusicStopped = false;
+
+  function playNextCollageNote() {
+    if (collageMusicStopped) return;
+    const now = musicCtx.currentTime;
+    const freq = NOTES[collageNoteIdx % NOTES.length];
+    collageNoteIdx++;
+    const osc = musicCtx.createOscillator();
+    const gain = musicCtx.createGain();
+    osc.connect(gain);
+    gain.connect(audioDest);
+    gain.connect(musicCtx.destination);
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(freq, now);
+    gain.gain.setValueAtTime(0, now);
+    gain.gain.linearRampToValueAtTime(0.055, now + 0.05);
+    gain.gain.linearRampToValueAtTime(0, now + NOTE_DUR * 0.85);
+    osc.start(now);
+    osc.stop(now + NOTE_DUR);
+    setTimeout(playNextCollageNote, NOTE_DUR * 1000);
+  }
+  playNextCollageNote();
+
+  const _origStop = stopCollageGeneration;
+  stopCollageGeneration = function() {
+    collageMusicStopped = true;
+    _origStop();
+  };
+  
+  let mimeOptions = { mimeType: 'video/webm;codecs=vp9,opus' };
+  if (!MediaRecorder.isTypeSupported(mimeOptions.mimeType)) {
+    mimeOptions = { mimeType: 'video/webm;codecs=vp8,opus' };
+  }
+  if (!MediaRecorder.isTypeSupported(mimeOptions.mimeType)) {
+    mimeOptions = { mimeType: 'video/webm' };
+  }
+  if (!MediaRecorder.isTypeSupported(mimeOptions.mimeType)) {
+    mimeOptions = {};
+  }
+  
+  collageRecorder = new MediaRecorder(combinedStream, mimeOptions);
+  collageRecorder.ondataavailable = (e) => {
+    if (e.data && e.data.size > 0) {
+      recordedChunks.push(e.data);
+    }
+  };
+  
+  collageRecorder.onstop = () => {
+    const blob = new Blob(recordedChunks, { type: collageRecorder.mimeType || 'video/webm' });
+    const videoUrl = URL.createObjectURL(blob);
+    
+    const video = document.getElementById('collage-video');
+    video.src = videoUrl;
+    video.load();
+    
+    const dlBtn = document.getElementById('collage-download-btn');
+    dlBtn.href = videoUrl;
+    const ext = (collageRecorder.mimeType && collageRecorder.mimeType.includes('mp4')) ? 'mp4' : 'webm';
+    dlBtn.download = `our_anniversary_collage.${ext}`;
+    
+    document.getElementById('collage-gen-view').style.display = 'none';
+    document.getElementById('collage-result-view').style.display = 'block';
+  };
+  
+  let totalDuration = 0;
+  const slides = preloaded.map((media) => {
+    let duration = 4000;
+    if (media.type === 'video') {
+      const v = media.element;
+      const vDur = (v.duration && !isNaN(v.duration) && v.duration > 0) ? v.duration * 1000 : 5000;
+      duration = Math.min(vDur, 5000);
+    }
+    const slide = {
+      media,
+      duration,
+      startTime: totalDuration,
+      endTime: totalDuration + duration
+    };
+    totalDuration += duration;
+    return slide;
+  });
+  
+  collageRecorder.start();
+  
+  const recordStartTime = performance.now();
+  const TRANSITION_DURATION = 800;
+  
+  hearts = [];
+  
+  function drawLoop() {
+    if (!isCollageRunning) return;
+    
+    const now = performance.now();
+    const elapsed = now - recordStartTime;
+    
+    progressBar.style.width = `${30 + Math.round((elapsed / totalDuration) * 70)}%`;
+    progressText.textContent = `Recording video... ${Math.round((elapsed / totalDuration) * 100)}%`;
+    
+    if (elapsed >= totalDuration) {
+      stopCollageGeneration();
+      if (collageRecorder && collageRecorder.state !== 'inactive') {
+        collageRecorder.stop();
+      }
+      return;
+    }
+    
+    collageCtx.fillStyle = '#1e1012';
+    collageCtx.fillRect(0, 0, 1280, 720);
+    
+    let currentSlideIdx = slides.findIndex(s => elapsed >= s.startTime && elapsed < s.endTime);
+    if (currentSlideIdx !== -1) {
+      const slide = slides[currentSlideIdx];
+      const slideElapsed = elapsed - slide.startTime;
+      const slideProgress = slideElapsed / slide.duration;
+      
+      const zoom = 1.0 + 0.08 * slideProgress;
+      
+      const timeToNext = slide.endTime - elapsed;
+      if (timeToNext < TRANSITION_DURATION && currentSlideIdx < slides.length - 1) {
+        const nextSlide = slides[currentSlideIdx + 1];
+        const nextSlideProgress = (elapsed - nextSlide.startTime) / nextSlide.duration;
+        const nextZoom = 1.0 + 0.08 * nextSlideProgress;
+        
+        const alpha = (TRANSITION_DURATION - timeToNext) / TRANSITION_DURATION;
+        
+        collageCtx.save();
+        collageCtx.globalAlpha = 1 - alpha;
+        drawMediaSlide(slide, zoom);
+        collageCtx.restore();
+        
+        collageCtx.save();
+        collageCtx.globalAlpha = alpha;
+        drawMediaSlide(nextSlide, nextZoom);
+        collageCtx.restore();
+      } else {
+        drawMediaSlide(slide, zoom);
+      }
+    }
+    
+    updateAndDrawHearts(collageCtx, 16.7);
+    
+    if (currentSlideIdx !== -1) {
+      const slide = slides[currentSlideIdx];
+      drawSlideText(slide.media.item);
+    }
+    
+    collageAnimationId = requestAnimationFrame(drawLoop);
+  }
+  
+  function drawMediaSlide(slide, scale) {
+    const media = slide.media;
+    if (media.type === 'video') {
+      const video = media.element;
+      if (video.paused && !video.ended) {
+        video.currentTime = 0;
+        video.play().catch(e => console.log(e));
+      }
+      drawImageProp(collageCtx, video, 0, 0, 1280, 720, 0.5, 0.5, scale);
+    } else {
+      drawImageProp(collageCtx, media.element, 0, 0, 1280, 720, 0.5, 0.5, scale);
+    }
+  }
+  
+  function drawSlideText(item) {
+    const grad = collageCtx.createLinearGradient(0, 570, 0, 720);
+    grad.addColorStop(0, 'rgba(0,0,0,0)');
+    grad.addColorStop(1, 'rgba(0,0,0,0.7)');
+    collageCtx.fillStyle = grad;
+    collageCtx.fillRect(0, 570, 1280, 150);
+    
+    collageCtx.save();
+    collageCtx.fillStyle = '#ffffff';
+    collageCtx.shadowColor = 'rgba(0,0,0,0.5)';
+    collageCtx.shadowBlur = 4;
+    
+    collageCtx.font = "italic 32px Georgia, serif";
+    collageCtx.fillText(item.caption || '', 60, 660);
+    
+    collageCtx.font = "bold 18px 'Inter', sans-serif";
+    collageCtx.fillStyle = 'rgba(255,255,255,0.75)';
+    collageCtx.fillText(item.timestamp || '', 60, 610);
+    
+    collageCtx.restore();
+  }
+  
+  collageAnimationId = requestAnimationFrame(drawLoop);
+}
+
+function stopCollageGeneration() {
+  isCollageRunning = false;
+  if (collageAnimationId) {
+    cancelAnimationFrame(collageAnimationId);
+    collageAnimationId = null;
+  }
+}
+
+// ═══════════════════════════════════════════════════
 // INIT
 // ═══════════════════════════════════════════════════
-window.addEventListener('DOMContentLoaded',()=>{
-  loadFromUrl();
-  buildDots();
+window.addEventListener('DOMContentLoaded', async () => {
+  loadFromUrl(); // Load state from URL hash first!
+  
+  // Try loading local moments from IndexedDB
+  try {
+    const saved = await loadMoments();
+    if (saved && saved.length > 0) {
+      const savedMap = {};
+      saved.forEach(record => {
+        savedMap[record.id] = record;
+      });
+      
+      // 1. Restore/assign local Object URLs to gifts
+      if (state.gifts.flowers.localId && savedMap[state.gifts.flowers.localId]) {
+        state.gifts.flowers.image = URL.createObjectURL(savedMap[state.gifts.flowers.localId].data);
+      }
+      if (state.gifts.earrings.localId && savedMap[state.gifts.earrings.localId]) {
+        state.gifts.earrings.image = URL.createObjectURL(savedMap[state.gifts.earrings.localId].data);
+      }
+      if (state.gifts.date.localId && savedMap[state.gifts.date.localId]) {
+        state.gifts.date.image = URL.createObjectURL(savedMap[state.gifts.date.localId].data);
+      }
+      
+      // 2. Restore/assign local Object URLs to gallery items
+      saved.forEach(record => {
+        // Skip if this record is a gift
+        if (record.id === state.gifts.flowers.localId || 
+            record.id === state.gifts.earrings.localId || 
+            record.id === state.gifts.date.localId) {
+          return;
+        }
+        
+        const objectUrl = URL.createObjectURL(record.data);
+        // Check if already in state.galleryItems
+        const existingItem = state.galleryItems.find(item => item.localId === record.id);
+        if (existingItem) {
+          existingItem.url = objectUrl;
+        } else {
+          // Newly added local item, append it
+          state.galleryItems.push({
+            type: record.type,
+            url: objectUrl,
+            caption: record.caption,
+            timestamp: record.timestamp,
+            localId: record.id
+          });
+        }
+      });
+    }
+  } catch (e) {
+    console.warn("Could not load local moments from IndexedDB:", e);
+  }
+
   renderDom();
   populateInputs();
   setupReveal();
-  initAutoPlay();
+  initUpload();
+  updateProgress();
+
+  // Auto-open Spotify drawer with Yun Hi
+  setTimeout(() => {
+    const select = document.getElementById('spotify-select');
+    if (select) select.value = '6z5zRQHFEEBrvMkVjjCN8S';
+    currentSpotifyTrackId = '6z5zRQHFEEBrvMkVjjCN8S';
+    changeSpotifyTrack('6z5zRQHFEEBrvMkVjjCN8S');
+    const drawer = document.getElementById('spotify-drawer');
+    spotifyDrawerOpen = true;
+    if (drawer) drawer.classList.add('open');
+  }, 800);
+
+  // Auto-sync progress on interactions
+  window.addEventListener('click', () => {
+    setTimeout(updateProgress, 100);
+  });
 });
 </script>
 </body>
