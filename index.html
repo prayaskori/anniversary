@@ -2045,35 +2045,137 @@ async function startCollageGeneration() {
   const audioDest = musicCtx.createMediaStreamDestination();
   combinedStream.addTrack(audioDest.stream.getAudioTracks()[0]);
 
-  const NOTES = [293.66,349.23,392,440,493.88,523.25,493.88,440,392,349.23,329.63,293.66];
-  const NOTE_DUR = 0.55;
-  let collageNoteIdx = 0;
+  // ── IKTARA MELODY SYNTHESIZER ──────────────────────────────
+  // Rich sitar/guitar tones with reverb, harmonics, and the real melody
   let collageMusicStopped = false;
 
-  function playNextCollageNote() {
-    if (collageMusicStopped) return;
-    const now = musicCtx.currentTime;
-    const freq = NOTES[collageNoteIdx % NOTES.length];
-    collageNoteIdx++;
-    const osc = musicCtx.createOscillator();
-    const gain = musicCtx.createGain();
-    osc.connect(gain);
-    gain.connect(audioDest);
-    gain.connect(musicCtx.destination);
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(freq, now);
-    gain.gain.setValueAtTime(0, now);
-    gain.gain.linearRampToValueAtTime(0.055, now + 0.05);
-    gain.gain.linearRampToValueAtTime(0, now + NOTE_DUR * 0.85);
-    osc.start(now);
-    osc.stop(now + NOTE_DUR);
-    setTimeout(playNextCollageNote, NOTE_DUR * 1000);
+  // Iktara melody (Wake Up Sid) – main motif repeated with variations
+  // Notes encoded as [frequency, duration_beats]
+  const IKTARA_MELODY = [
+    // Phrase 1 – the iconic opening iktara motif
+    [261.63,0.5],[293.66,0.5],[329.63,1.0],[261.63,0.5],[293.66,0.5],[349.23,1.0],
+    [261.63,0.5],[293.66,0.5],[329.63,0.5],[293.66,0.5],[261.63,1.5],
+    // Phrase 2 – rising
+    [261.63,0.5],[329.63,0.5],[392.00,0.5],[440.00,0.5],[392.00,1.0],
+    [329.63,0.5],[293.66,0.5],[261.63,1.5],
+    // Phrase 3 – emotional peak
+    [392.00,0.5],[440.00,0.5],[493.88,0.5],[523.25,0.5],[493.88,1.0],
+    [440.00,0.5],[392.00,0.5],[349.23,1.5],
+    // Phrase 4 – resolution
+    [329.63,0.5],[293.66,0.5],[261.63,0.5],[293.66,0.5],[329.63,1.0],
+    [293.66,0.5],[261.63,0.5],[246.94,1.5],
+    // Bridge – softer, intimate
+    [261.63,1.0],[293.66,0.5],[329.63,0.5],[349.23,0.5],[329.63,0.5],[293.66,0.5],[261.63,1.5],
+    // Return to opening motif
+    [261.63,0.5],[293.66,0.5],[329.63,1.0],[261.63,0.5],[293.66,0.5],[349.23,1.5],
+  ];
+  const BPM = 72;
+  const BEAT_SEC = 60 / BPM;
+
+  // Build a reverb impulse for warmth
+  function createReverb(ctx) {
+    const len = ctx.sampleRate * 1.8;
+    const buf = ctx.createBuffer(2, len, ctx.sampleRate);
+    for (let c = 0; c < 2; c++) {
+      const d = buf.getChannelData(c);
+      for (let i = 0; i < len; i++) {
+        d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 3.5);
+      }
+    }
+    const conv = ctx.createConvolver();
+    conv.buffer = buf;
+    return conv;
   }
-  playNextCollageNote();
+
+  const reverb = createReverb(musicCtx);
+  const masterGain = musicCtx.createGain();
+  masterGain.gain.setValueAtTime(0.82, musicCtx.currentTime);
+  const dryGain = musicCtx.createGain();
+  dryGain.gain.setValueAtTime(0.7, musicCtx.currentTime);
+  const wetGain = musicCtx.createGain();
+  wetGain.gain.setValueAtTime(0.3, musicCtx.currentTime);
+
+  // Route: source → dryGain + reverbWet → masterGain → audioDest + destination
+  dryGain.connect(masterGain);
+  reverb.connect(wetGain);
+  wetGain.connect(masterGain);
+  masterGain.connect(audioDest);
+  masterGain.connect(musicCtx.destination);
+
+  function playMelodyNote(freq, startTime, dur) {
+    if (collageMusicStopped) return;
+    // Main sitar-like tone: blend sine + sawtooth harmonics
+    const osc1 = musicCtx.createOscillator();
+    const osc2 = musicCtx.createOscillator();
+    const osc3 = musicCtx.createOscillator();
+    const noteGain = musicCtx.createGain();
+
+    osc1.type = 'sine';
+    osc1.frequency.setValueAtTime(freq, startTime);
+    osc2.type = 'triangle';
+    osc2.frequency.setValueAtTime(freq * 2.003, startTime); // slight detune harmonic
+    osc3.type = 'sine';
+    osc3.frequency.setValueAtTime(freq * 3.01, startTime);  // upper harmonic
+
+    const g1 = musicCtx.createGain(); g1.gain.setValueAtTime(0.55, startTime);
+    const g2 = musicCtx.createGain(); g2.gain.setValueAtTime(0.25, startTime);
+    const g3 = musicCtx.createGain(); g3.gain.setValueAtTime(0.08, startTime);
+
+    osc1.connect(g1); osc2.connect(g2); osc3.connect(g3);
+    g1.connect(noteGain); g2.connect(noteGain); g3.connect(noteGain);
+    noteGain.connect(dryGain);
+    noteGain.connect(reverb);
+
+    // ADSR envelope
+    noteGain.gain.setValueAtTime(0, startTime);
+    noteGain.gain.linearRampToValueAtTime(0.75, startTime + 0.03);
+    noteGain.gain.setValueAtTime(0.55, startTime + 0.08);
+    noteGain.gain.exponentialRampToValueAtTime(0.001, startTime + dur * 0.92);
+
+    osc1.start(startTime); osc1.stop(startTime + dur);
+    osc2.start(startTime); osc2.stop(startTime + dur);
+    osc3.start(startTime); osc3.stop(startTime + dur);
+  }
+
+  // Also add a soft bass drone (tanpura-like)
+  function playBassDrone() {
+    if (collageMusicStopped) return;
+    const baseNote = 130.81; // C3 tonic
+    [baseNote, baseNote * 1.5, baseNote * 2].forEach((freq, i) => {
+      const osc = musicCtx.createOscillator();
+      const g = musicCtx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq, musicCtx.currentTime);
+      g.gain.setValueAtTime(0.045 / (i + 1), musicCtx.currentTime);
+      osc.connect(g); g.connect(masterGain);
+      osc.start(musicCtx.currentTime);
+      // Will be stopped when collageMusicStopped
+      droneOscs.push(osc);
+    });
+  }
+  const droneOscs = [];
+  playBassDrone();
+
+  // Schedule the full melody starting now, looping
+  function scheduleMelody(startTime) {
+    if (collageMusicStopped) return;
+    let t = startTime;
+    IKTARA_MELODY.forEach(([freq, beats]) => {
+      const dur = beats * BEAT_SEC;
+      playMelodyNote(freq, t, dur);
+      t += dur * 0.95; // slight legato overlap
+    });
+    // Loop melody
+    const loopDur = t - startTime;
+    setTimeout(() => scheduleMelody(musicCtx.currentTime), (loopDur - 0.1) * 1000);
+  }
+  scheduleMelody(musicCtx.currentTime + 0.1);
 
   const _origStop = stopCollageGeneration;
   stopCollageGeneration = function() {
     collageMusicStopped = true;
+    droneOscs.forEach(o => { try { o.stop(); } catch(e){} });
+    masterGain.gain.linearRampToValueAtTime(0, musicCtx.currentTime + 0.5);
     _origStop();
   };
   
