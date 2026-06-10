@@ -56,6 +56,17 @@ section{padding:7rem 0}
 .reveal{opacity:0;transform:translateY(36px);transition:opacity .85s ease,transform .85s ease}
 .reveal.active{opacity:1;transform:translateY(0)}
 
+/* Proposal Overlay Animations */
+@keyframes proposalFadeIn{from{opacity:0;transform:scale(0.9) translateY(20px)}to{opacity:1;transform:scale(1) translateY(0)}}
+@keyframes proposalPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.15)}}
+@keyframes proposalNoBtnVanish{0%{opacity:1;transform:scale(1)}50%{transform:scale(1.3) rotate(10deg);opacity:0.5}100%{opacity:0;transform:scale(0) rotate(45deg)}}
+@keyframes confettiFall{0%{transform:translateY(-10px) rotate(0deg);opacity:1}100%{transform:translateY(100vh) rotate(720deg);opacity:0}}
+#proposal-overlay .confetti-piece{position:absolute;width:10px;height:10px;border-radius:2px;animation:confettiFall 3s ease-out forwards}
+#proposal-yes-btn:hover{transform:scale(1.08);box-shadow:0 6px 35px rgba(224,101,109,0.7)}
+#proposal-no-btn:hover{background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.7)}
+
+
+
 /* ═══════════════════════════════════════
    EDIT BUTTON
 ═══════════════════════════════════════ */
@@ -664,6 +675,10 @@ footer{background:linear-gradient(135deg,#fde8e8,#fdf3e3);border-top:1px solid v
       <div style="margin-top: 0.6rem; text-align: center;">
         <a id="share-link-clickable" href="#" target="_blank" style="font-size: 0.76rem; color: var(--rose-dk); font-weight: 600; text-decoration: underline; display: inline-block;">Open & Preview Link 🔗</a>
       </div>
+      <div style="margin-top: 0.6rem; text-align: center; border-top: 1px dashed rgba(224, 101, 109, 0.2); padding-top: 0.6rem;">
+        <p style="font-size: 0.68rem; color: var(--muted); margin-bottom: 0.2rem; font-weight: normal;">To edit this page in the future, save this link:</p>
+        <a id="edit-link-clickable" href="#" target="_blank" style="font-size: 0.72rem; color: var(--gold); font-weight: 600; text-decoration: underline; display: inline-block;">Bookmark Edit Link ✏️</a>
+      </div>
     </div>
   </div>
 </div>
@@ -978,6 +993,28 @@ footer{background:linear-gradient(135deg,#fde8e8,#fdf3e3);border-top:1px solid v
         <button class="gift-view-btn" style="margin-top: 0; padding: 0.7rem 2rem; background: #eee; color: var(--text); box-shadow: none;" onclick="closeCollageModal()">Close</button>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- PROPOSAL OVERLAY (shown when collage video ends) -->
+<div id="proposal-overlay" style="display:none; position:fixed; inset:0; z-index:10000; background:rgba(15,5,8,0.92); backdrop-filter:blur(12px); flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:2rem;">
+  <div id="proposal-content" style="max-width:520px; animation: proposalFadeIn 1s ease;">
+    <div style="font-size:3.5rem; margin-bottom:0.8rem; animation: proposalPulse 1.5s infinite;">❤️</div>
+    <h2 style="font-family:'Playfair Display',Georgia,serif; font-size:clamp(1.8rem,5vw,2.6rem); color:#fff; margin-bottom:0.6rem; text-shadow:0 0 30px rgba(224,101,109,0.5);">I Love You!</h2>
+    <p style="font-size:1.05rem; color:#fce4ec; line-height:1.7; margin-bottom:0.5rem; font-style:italic;">My Promise to You:</p>
+    <p style="font-size:1rem; color:rgba(255,255,255,0.85); line-height:1.8; margin-bottom:1.5rem;">“I promise to learn from my mistakes, to never repeat them, and to stand by your side, loving you always.”</p>
+    <h3 style="font-family:'Playfair Display',Georgia,serif; font-size:clamp(1.3rem,4vw,1.9rem); color:#ffe082; margin-bottom:2rem; text-shadow:0 0 20px rgba(255,179,0,0.4);">Will you go on a beautiful date with me? 🌹</h3>
+    <div id="proposal-buttons" style="display:flex; gap:1.2rem; justify-content:center; flex-wrap:wrap;">
+      <button id="proposal-no-btn" onclick="proposalNoClicked()" style="padding:0.8rem 2.2rem; border-radius:50px; border:2px solid rgba(255,255,255,0.25); background:transparent; color:rgba(255,255,255,0.5); font-size:0.95rem; cursor:pointer; transition:all 0.4s ease; font-family:'Inter',system-ui,sans-serif;">No</button>
+      <button id="proposal-yes-btn" onclick="proposalYesClicked()" style="padding:0.8rem 2.6rem; border-radius:50px; border:none; background:linear-gradient(135deg,#e0656d,#ff9ebb); color:#fff; font-size:1.1rem; font-weight:700; cursor:pointer; box-shadow:0 4px 25px rgba(224,101,109,0.5); transition:all 0.4s ease; font-family:'Inter',system-ui,sans-serif; letter-spacing:0.5px;">Absolutely Yes! 💕</button>
+    </div>
+  </div>
+  <div id="proposal-celebration" style="display:none; animation: proposalFadeIn 0.8s ease;">
+    <div style="font-size:4rem; margin-bottom:1rem;">🎉🥰🎉</div>
+    <h2 style="font-family:'Playfair Display',Georgia,serif; font-size:clamp(2rem,5vw,3rem); color:#ffe082; margin-bottom:1rem; text-shadow:0 0 30px rgba(255,179,0,0.5);">You Just Made Me the Happiest!</h2>
+    <p style="font-size:1.15rem; color:#fff; line-height:1.8; margin-bottom:1.5rem; max-width:450px;">I can’t wait for our date! Get ready for the most amazing time together. I love you more than words can say. 💖</p>
+    <p style="font-size:1.3rem; color:#ff9ebb; font-family:'Dancing Script',cursive; font-weight:700;">Forever Yours ❤️</p>
+    <button onclick="closeProposalOverlay()" style="margin-top:2rem; padding:0.7rem 2rem; border-radius:50px; border:2px solid rgba(255,255,255,0.3); background:transparent; color:#fff; font-size:0.9rem; cursor:pointer; font-family:'Inter',system-ui,sans-serif; transition:all 0.3s;">Close ✨</button>
   </div>
 </div>
 
@@ -1546,6 +1583,8 @@ function confirmAndShare(){
     document.getElementById('share-input').value=url;
     const clickLink = document.getElementById('share-link-clickable');
     if (clickLink) clickLink.href = url;
+    const editLink = document.getElementById('edit-link-clickable');
+    if (editLink) editLink.href = url + '&edit=true';
     
     // Set WhatsApp Share Link
     const waBtn = document.getElementById('wa-share-btn');
@@ -1570,13 +1609,21 @@ function loadFromUrl(){
   const h=window.location.hash;
   if(!h.startsWith('#data='))return;
   try{
-    const b64=decodeURIComponent(h.substring(6));
+    const parts = h.substring(6).split('&');
+    const b64=decodeURIComponent(parts[0]);
     const bin=atob(b64);
     const bytes=new Uint8Array(bin.length);
     for(let i=0;i<bin.length;i++)bytes[i]=bin.charCodeAt(i);
     const loaded=JSON.parse(new TextDecoder().decode(bytes));
     state={...state,...loaded};
-    document.getElementById('edit-btn').style.display='none';
+    
+    const urlParams = new URLSearchParams(window.location.search);
+    const hasEditParam = urlParams.get('edit') === 'true' || h.includes('edit=true');
+    if (!hasEditParam) {
+      document.getElementById('edit-btn').style.display='none';
+    } else {
+      document.getElementById('edit-btn').style.display='block';
+    }
   }catch(e){console.warn('URL state load failed:',e);}
 }
 
@@ -2106,6 +2153,19 @@ async function startCollageGeneration() {
     video.src = videoUrl;
     video.load();
     
+    // Show proposal overlay when video finishes playing
+    video.addEventListener('ended', function() {
+      const overlay = document.getElementById('proposal-overlay');
+      if (overlay) {
+        overlay.style.display = 'flex';
+        // Reset state each time
+        document.getElementById('proposal-content').style.display = 'block';
+        document.getElementById('proposal-celebration').style.display = 'none';
+        const noBtn = document.getElementById('proposal-no-btn');
+        if (noBtn) { noBtn.style.display = 'inline-block'; noBtn.style.animation = ''; }
+      }
+    });
+    
     const dlBtn = document.getElementById('collage-download-btn');
     dlBtn.href = videoUrl;
     const ext = (collageRecorder.mimeType && collageRecorder.mimeType.includes('mp4')) ? 'mp4' : 'webm';
@@ -2117,11 +2177,11 @@ async function startCollageGeneration() {
   
   let totalDuration = 0;
   const slides = preloaded.map((media) => {
-    let duration = 4000;
+    let duration = 2500;
     if (media.type === 'video') {
       const v = media.element;
-      const vDur = (v.duration && !isNaN(v.duration) && v.duration > 0) ? v.duration * 1000 : 5000;
-      duration = Math.min(vDur, 5000);
+      const vDur = (v.duration && !isNaN(v.duration) && v.duration > 0) ? v.duration * 1000 : 3500;
+      duration = Math.min(vDur, 3500);
     }
     const slide = {
       media,
@@ -2133,10 +2193,20 @@ async function startCollageGeneration() {
     return slide;
   });
   
+  // Custom final proposal slide
+  const proposalDuration = 4500; // 4.5 seconds
+  slides.push({
+    isProposal: true,
+    duration: proposalDuration,
+    startTime: totalDuration,
+    endTime: totalDuration + proposalDuration
+  });
+  totalDuration += proposalDuration;
+  
   collageRecorder.start();
   
   const recordStartTime = performance.now();
-  const TRANSITION_DURATION = 800;
+  const TRANSITION_DURATION = 600;
   
   hearts = [];
   
@@ -2178,15 +2248,27 @@ async function startCollageGeneration() {
         
         collageCtx.save();
         collageCtx.globalAlpha = 1 - alpha;
-        drawMediaSlide(slide, zoom);
+        if (slide.isProposal) {
+          drawProposalSlideOnCanvas(elapsed - slide.startTime, slide.duration);
+        } else {
+          drawMediaSlide(slide, zoom);
+        }
         collageCtx.restore();
         
         collageCtx.save();
         collageCtx.globalAlpha = alpha;
-        drawMediaSlide(nextSlide, nextZoom);
+        if (nextSlide.isProposal) {
+          drawProposalSlideOnCanvas(elapsed - nextSlide.startTime, nextSlide.duration);
+        } else {
+          drawMediaSlide(nextSlide, nextZoom);
+        }
         collageCtx.restore();
       } else {
-        drawMediaSlide(slide, zoom);
+        if (slide.isProposal) {
+          drawProposalSlideOnCanvas(elapsed - slide.startTime, slide.duration);
+        } else {
+          drawMediaSlide(slide, zoom);
+        }
       }
     }
     
@@ -2194,7 +2276,9 @@ async function startCollageGeneration() {
     
     if (currentSlideIdx !== -1) {
       const slide = slides[currentSlideIdx];
-      drawSlideText(slide.media.item);
+      if (!slide.isProposal) {
+        drawSlideText(slide.media.item);
+      }
     }
     
     collageAnimationId = requestAnimationFrame(drawLoop);
@@ -2235,6 +2319,87 @@ async function startCollageGeneration() {
     
     collageCtx.restore();
   }
+
+  function drawProposalSlideOnCanvas(slideElapsed, slideDuration) {
+    const grad = collageCtx.createLinearGradient(0, 0, 1280, 720);
+    grad.addColorStop(0, '#1e0b0e'); 
+    grad.addColorStop(0.5, '#2e1217'); 
+    grad.addColorStop(1, '#1e0b0e');
+    collageCtx.fillStyle = grad;
+    collageCtx.fillRect(0, 0, 1280, 720);
+
+    collageCtx.save();
+    for (let i = 0; i < 15; i++) {
+      const seedX = (Math.sin(i * 45.3) * 0.5 + 0.5) * 1280;
+      const speedY = 0.08 + (Math.cos(i * 12.7) * 0.02 + 0.03);
+      const seedY = 800 - ((slideElapsed * speedY + i * 80) % 900);
+      const size = 15 + (Math.sin(i * 9.1) * 5 + 5);
+      
+      collageCtx.fillStyle = "rgba(224, 101, 109, " + String(0.12 + Math.sin(slideElapsed/1000.0 + i)*0.04) + ")";
+      drawCanvasHeart(collageCtx, seedX, seedY, size, size);
+    }
+    collageCtx.restore();
+
+    collageCtx.save();
+    collageCtx.textAlign = 'center';
+    collageCtx.shadowColor = 'rgba(224, 101, 109, 0.6)';
+    collageCtx.shadowBlur = 15;
+    
+    const pulse = 1.0 + Math.sin(slideElapsed / 300.0) * 0.03;
+    collageCtx.font = "bold " + String(Math.round(56 * pulse)) + "px Georgia, serif";
+    
+    const titleGrad = collageCtx.createLinearGradient(0, 100, 0, 200);
+    titleGrad.addColorStop(0, '#ff9ebb');
+    titleGrad.addColorStop(1, '#e0656d');
+    collageCtx.fillStyle = titleGrad;
+    collageCtx.fillText("I Love You! ❤️", 640, 180);
+    collageCtx.restore();
+
+    collageCtx.save();
+    collageCtx.textAlign = 'center';
+    collageCtx.fillStyle = '#ffffff';
+    collageCtx.shadowColor = 'rgba(0,0,0,0.4)';
+    collageCtx.shadowBlur = 6;
+
+    collageCtx.font = "italic 24px Georgia, serif";
+    collageCtx.fillText("My Promise to You:", 640, 260);
+
+    collageCtx.font = "30px Georgia, serif";
+    collageCtx.fillStyle = '#fce4ec'; 
+    collageCtx.fillText("“I promise to learn from my mistakes, to never repeat them,”", 640, 320);
+    collageCtx.fillText("“and to stand by your side, loving you always.”", 640, 370);
+
+    collageCtx.font = "bold 34px Georgia, serif";
+    const goldGrad = collageCtx.createLinearGradient(0, 430, 0, 520);
+    goldGrad.addColorStop(0, '#ffe082');
+    goldGrad.addColorStop(1, '#ffb300');
+    collageCtx.fillStyle = goldGrad;
+    collageCtx.shadowColor = 'rgba(255, 179, 0, 0.4)';
+    collageCtx.shadowBlur = 10;
+    
+    const pulseDate = 1.0 + Math.sin(slideElapsed / 400.0 + Math.PI/2.0) * 0.02;
+    collageCtx.font = "bold " + String(Math.round(34 * pulseDate)) + "px Georgia, serif";
+    collageCtx.fillText("Will you go on a beautiful date with me? 🌹", 640, 480);
+    collageCtx.restore();
+  }
+
+  function drawCanvasHeart(ctx, x, y, width, height) {
+    ctx.beginPath();
+    const topCurveHeight = height * 0.3;
+    ctx.moveTo(x, y + topCurveHeight);
+    ctx.bezierCurveTo(
+      x - width/2, y - topCurveHeight/2,
+      x - width/2, y + (height + topCurveHeight)/2,
+      x, y + height
+    );
+    ctx.bezierCurveTo(
+      x + width/2, y + (height + topCurveHeight)/2,
+      x + width/2, y - topCurveHeight/2,
+      x, y + topCurveHeight
+    );
+    ctx.closePath();
+    ctx.fill();
+  }
   
   collageAnimationId = requestAnimationFrame(drawLoop);
 }
@@ -2250,8 +2415,55 @@ function stopCollageGeneration() {
 // ═══════════════════════════════════════════════════
 // INIT
 // ═══════════════════════════════════════════════════
+// PROPOSAL OVERLAY FUNCTIONS
+// ═══════════════════════════════════════════════════
+function proposalNoClicked() {
+  const noBtn = document.getElementById('proposal-no-btn');
+  if (noBtn) {
+    noBtn.style.animation = 'proposalNoBtnVanish 0.6s ease forwards';
+    setTimeout(() => { noBtn.style.display = 'none'; }, 600);
+  }
+}
+
+function proposalYesClicked() {
+  const content = document.getElementById('proposal-content');
+  const celebration = document.getElementById('proposal-celebration');
+  if (content) content.style.display = 'none';
+  if (celebration) celebration.style.display = 'block';
+  
+  // Spawn confetti
+  const overlay = document.getElementById('proposal-overlay');
+  const colors = ['#e0656d','#ff9ebb','#ffe082','#ffb300','#fce4ec','#fff','#c49a6c'];
+  for (let i = 0; i < 60; i++) {
+    const piece = document.createElement('div');
+    piece.className = 'confetti-piece';
+    piece.style.left = Math.random() * 100 + '%';
+    piece.style.top = '-10px';
+    piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+    piece.style.width = (6 + Math.random() * 8) + 'px';
+    piece.style.height = (6 + Math.random() * 8) + 'px';
+    piece.style.animationDelay = (Math.random() * 2) + 's';
+    piece.style.animationDuration = (2 + Math.random() * 2) + 's';
+    overlay.appendChild(piece);
+  }
+}
+
+function closeProposalOverlay() {
+  const overlay = document.getElementById('proposal-overlay');
+  if (overlay) {
+    overlay.style.display = 'none';
+    // Clean up confetti
+    overlay.querySelectorAll('.confetti-piece').forEach(p => p.remove());
+  }
+}
+
+// ═══════════════════════════════════════════════════
 window.addEventListener('DOMContentLoaded', async () => {
   loadFromUrl(); // Load state from URL hash first!
+  window.addEventListener('hashchange', () => {
+    loadFromUrl();
+    renderDom();
+  });
   
   // Try loading local moments from IndexedDB
   try {
