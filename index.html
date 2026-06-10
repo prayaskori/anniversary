@@ -1199,14 +1199,60 @@ function startGame(){
   startOverlay.classList.add('hide');
   poppedCount=0;poppedEl.textContent=0;
   totalEl.textContent=state.balloonMessages.length;
-  statusEl.textContent='In progress...';
   msgIdx=0;
   activeBalloons.forEach(b=>b.remove());activeBalloons=[];
   if(spawnTimer)clearInterval(spawnTimer);
-  for(let i=0;i<3;i++)spawnBalloon();
-  spawnTimer=setInterval(()=>{
-    if(activeBalloons.length<6&&poppedCount<state.balloonMessages.length)spawnBalloon();
-  },1500);
+
+  const countdownOverlay = document.getElementById('countdown-overlay');
+  const cdNumber = document.getElementById('cd-number');
+  
+  if (countdownOverlay && cdNumber) {
+    statusEl.textContent = 'Get ready...';
+    countdownOverlay.classList.remove('fade-out');
+    countdownOverlay.classList.add('show');
+    let count = 3;
+    cdNumber.textContent = count;
+    
+    // Quick pulse animation helper
+    const pulseNumber = () => {
+      cdNumber.style.transform = 'scale(1.4)';
+      cdNumber.style.opacity = '0.3';
+      setTimeout(() => {
+        cdNumber.style.transform = 'scale(1)';
+        cdNumber.style.opacity = '1';
+      }, 150);
+    };
+    pulseNumber();
+
+    const cdInterval = setInterval(() => {
+      count--;
+      if (count > 0) {
+        cdNumber.textContent = count;
+        pulseNumber();
+      } else if (count === 0) {
+        cdNumber.textContent = "Go! 🎈";
+        pulseNumber();
+      } else {
+        clearInterval(cdInterval);
+        countdownOverlay.classList.remove('show');
+        countdownOverlay.classList.add('fade-out');
+        
+        statusEl.textContent='In progress...';
+        // Spawn initial balloons
+        for(let i=0;i<3;i++)spawnBalloon();
+        spawnTimer=setInterval(()=>{
+          if(activeBalloons.length<6&&poppedCount<state.balloonMessages.length)spawnBalloon();
+        },1500);
+      }
+    }, 1000);
+  } else {
+    // Fallback if elements not found
+    statusEl.textContent='In progress...';
+    for(let i=0;i<3;i++)spawnBalloon();
+    spawnTimer=setInterval(()=>{
+      if(activeBalloons.length<6&&poppedCount<state.balloonMessages.length)spawnBalloon();
+    },1500);
+  }
 }
 
 function spawnBalloon(){
