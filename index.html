@@ -57,6 +57,32 @@ section{padding:7rem 0}
 .reveal{opacity:0;transform:translateY(36px);transition:opacity .85s ease,transform .85s ease}
 .reveal.active{opacity:1;transform:translateY(0)}
 
+/* Loading State */
+.loading-state #loading-spinner-overlay {
+  display: flex !important;
+}
+.loading-state header,
+.loading-state section,
+.loading-state footer,
+.loading-state #customizer,
+.loading-state #edit-btn,
+.loading-state .spotify-trigger {
+  display: none !important;
+}
+
+/* Loading State */
+.loading-state #loading-spinner-overlay {
+  display: flex !important;
+}
+.loading-state header,
+.loading-state section,
+.loading-state footer,
+.loading-state #customizer,
+.loading-state #edit-btn,
+.loading-state .spotify-trigger {
+  display: none !important;
+}
+
 /* Proposal Overlay Animations */
 @keyframes proposalFadeIn{from{opacity:0;transform:scale(0.9) translateY(20px)}to{opacity:1;transform:scale(1) translateY(0)}}
 @keyframes proposalPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.15)}}
@@ -548,6 +574,20 @@ footer{background:linear-gradient(135deg,#fde8e8,#fdf3e3);border-top:1px solid v
 </head>
 <body>
 
+<script>
+  // Block rendering if d parameter is present to prevent flash of defaults
+  const urlParamsForLoader = new URLSearchParams(window.location.search);
+  if (urlParamsForLoader.has('d') || window.location.hash.startsWith('#data=')) {
+    document.documentElement.classList.add('loading-state');
+  }
+</script>
+
+<!-- Loading Spinner Overlay -->
+<div id="loading-spinner-overlay" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:#fff8f6; z-index:99999; flex-direction:column; align-items:center; justify-content:center; transition:opacity 0.5s ease;">
+  <div class="heart-spinner" style="font-size:3.5rem; animation: pulse 1s infinite alternate; filter: drop-shadow(0 0 15px rgba(224,101,109,0.4));">💕</div>
+  <p style="font-family:'Playfair Display', Georgia, serif; font-size:1.2rem; color:var(--rose-dk); margin-top:1.5rem; font-weight:600; letter-spacing:0.5px;">Loading Your Love Note...</p>
+</div>
+
 <canvas id="bg-canvas"></canvas>
 
 <!-- Edit Button -->
@@ -661,11 +701,13 @@ footer{background:linear-gradient(135deg,#fde8e8,#fdf3e3);border-top:1px solid v
       </div>
       <div class="fg"><label>Ticket Activity</label><input id="inp-tkt" type="text"></div>
       <div class="fg"><label>Ticket Details</label><input id="inp-tks" type="text"></div>
+      <div class="fg"><label>Ticket Validation Info</label><input id="inp-tkv" type="text"></div>
     </div>
 
   </div>
   <div class="c-foot">
     <button class="confirm-btn" onclick="confirmAndShare()">✓ Save & Get Shareable Link</button>
+    <div id="save-warning" style="display:none; color:#c0392b; font-size:0.75rem; margin-top:0.5rem; text-align:center; font-weight:600; line-height:1.4;"></div>
     <div class="share-box" id="share-box">
       <p>Send this link to her ♥</p>
       <div class="share-row" style="display: flex; gap: 0.45rem; flex-wrap: wrap;">
@@ -1332,16 +1374,23 @@ function getYtId(url){
 function renderGallery(){
   const grid=document.getElementById('gallery-grid');
   grid.innerHTML='';
+  
+  const urlParams = new URLSearchParams(window.location.search);
+  const isShared = urlParams.has('d');
+  
   state.galleryItems.forEach((item,idx)=>{
+    if (!item.url) return;
+    if (isShared && item.url.startsWith('https://picsum.photos/')) return;
+    
     const card=document.createElement('div');
     card.className='gallery-card';
     const ytId=getYtId(item.url);
     let media='',badge='';
     if(ytId){
-      media=`<iframe class="g-yt" src="https://www.youtube.com/embed/${ytId}" allowfullscreen loading="lazy"></iframe>`;
-      badge='<div class="gallery-type-tag">▶ Video</div>';
+      media=`<iframe class="g-yt" src="https://www.youtube.com/embed/${ytId}?rel=0&playsinline=1" allowfullscreen loading="lazy" style="border:none; width:100%; height:100%; min-height:220px; border-radius:12px;"></iframe>`;
+      badge='<div class="gallery-type-tag">▶ YouTube</div>';
     }else if(item.type==='video'){
-      media=`<video class="g-video" controls preload="metadata"><source src="${item.url}"><p style="padding:1rem;font-size:.85rem;color:var(--muted)">Video not available</p></video>`;
+      media=`<video class="g-video" controls playsinline muted preload="metadata" style="width:100%; border-radius:12px;"><source src="${item.url}"><p style="padding:1rem;font-size:.85rem;color:var(--muted)">Video not available</p></video>`;
       badge='<div class="gallery-type-tag">▶ Video</div>';
     }else{
       media=`<img class="g-img" src="${item.url}" alt="${item.caption||''}" loading="lazy">`;
@@ -1380,14 +1429,16 @@ function showGiftModal(n){
   const title=document.getElementById('gm-title');
   const desc=document.getElementById('gm-desc');
   const ticketCont=document.getElementById('gm-ticket-container');
+  const imgCont=document.querySelector('.gift-modal-img-container');
   
+  let giftImgUrl = '';
   if(n===1){
     badge.textContent="Gift 🌸 Flowers";
     badge.style.background="rgba(224,101,109,0.1)";
     badge.style.color="var(--rose-dk)";
     title.textContent=state.gifts.flowers.title;
     desc.textContent=state.gifts.flowers.description;
-    img.src=state.gifts.flowers.image || "https://images.unsplash.com/photo-1561181286-d3fee7d55364?q=80&w=1000";
+    giftImgUrl = state.gifts.flowers.image;
     ticketCont.style.display='none';
   }else if(n===2){
     badge.textContent="Gift 💎 Earrings";
@@ -1395,7 +1446,7 @@ function showGiftModal(n){
     badge.style.color="var(--gold)";
     title.textContent=state.gifts.earrings.title;
     desc.textContent=state.gifts.earrings.description;
-    img.src=state.gifts.earrings.image || "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?q=80&w=1000";
+    giftImgUrl = state.gifts.earrings.image;
     ticketCont.style.display='none';
   }else if(n===3){
     badge.textContent="Gift 🎫 Date Ticket";
@@ -1403,7 +1454,7 @@ function showGiftModal(n){
     badge.style.color="var(--rose-dk)";
     title.textContent=state.gifts.date.title;
     desc.textContent=state.gifts.date.description;
-    img.src=state.gifts.date.image || "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=1000";
+    giftImgUrl = state.gifts.date.image;
     
     document.getElementById('gm-ticket-venue').textContent=state.gifts.date.venue || "Cozy Beachside Resort";
     document.getElementById('gm-ticket-title').textContent=state.gifts.date.ticketTitle || "AN EVENING FOR US";
@@ -1411,6 +1462,20 @@ function showGiftModal(n){
     document.getElementById('gm-ticket-val').textContent=state.gifts.date.ticketValidation || "VALID FOREVER • FOR MY SWEETHEART";
     
     ticketCont.style.display='block';
+  }
+  
+  const urlParams = new URLSearchParams(window.location.search);
+  const isShared = urlParams.has('d');
+  
+  if (isShared && giftImgUrl && giftImgUrl.startsWith('https://images.unsplash.com/')) {
+    giftImgUrl = '';
+  }
+  
+  if (giftImgUrl) {
+    img.src = giftImgUrl;
+    if (imgCont) imgCont.style.display = 'block';
+  } else {
+    if (imgCont) imgCont.style.display = 'none';
   }
   
   modal.classList.add('show');
@@ -1495,6 +1560,7 @@ function populateInputs(){
   document.getElementById('inp-g3ven').value=state.gifts.date.venue || '';
   document.getElementById('inp-tkt').value=state.gifts.date.ticketTitle;
   document.getElementById('inp-tks').value=state.gifts.date.ticketDetails;
+  if(document.getElementById('inp-tkv')) document.getElementById('inp-tkv').value=state.gifts.date.ticketValidation || '';
   if (typeof updateGiftPreviews === 'function') updateGiftPreviews();
   renderBalloonInputs();
   renderGalleryInputs();
@@ -1521,7 +1587,6 @@ function addBalloon(){
 }
 
 function removeBalloon(i){
-  if(state.balloonMessages.length<=1)return;
   state.balloonMessages.splice(i,1);
   renderBalloonInputs();
   document.getElementById('total-target').textContent=state.balloonMessages.length;
@@ -1703,6 +1768,7 @@ function readInputs(){
   state.gifts.date.venue=document.getElementById('inp-g3ven').value;
   state.gifts.date.ticketTitle=document.getElementById('inp-tkt').value;
   state.gifts.date.ticketDetails=document.getElementById('inp-tks').value;
+  if(document.getElementById('inp-tkv')) state.gifts.date.ticketValidation=document.getElementById('inp-tkv').value;
   document.querySelectorAll('.b-inp').forEach(el=>{const i=parseInt(el.dataset.i);state.balloonMessages[i]=el.value;});
   document.querySelectorAll('.g-cap').forEach(el=>{const i=parseInt(el.dataset.i);state.galleryItems[i].caption=el.value;});
   document.querySelectorAll('.g-ts').forEach(el=>{const i=parseInt(el.dataset.i);state.galleryItems[i].timestamp=el.value;});
@@ -1711,83 +1777,115 @@ function readInputs(){
 async function confirmAndShare(){
   const saveBtn = document.querySelector('.confirm-btn');
   const originalText = saveBtn ? saveBtn.textContent : '✓ Save & Get Shareable Link';
+  const warningEl = document.getElementById('save-warning');
+  if (warningEl) {
+    warningEl.style.display = 'none';
+    warningEl.textContent = '';
+  }
+  
   if (saveBtn) {
     saveBtn.disabled = true;
-    saveBtn.textContent = '⏳ Compressing & Saving...';
+    saveBtn.textContent = '⏳ Uploading & Saving...';
   }
   
   readInputs();
   
-  // Check for local video files (which are too large for URL sharing)
-  let hasLocalVideo = false;
-  for (let i = 0; i < state.galleryItems.length; i++) {
-    const item = state.galleryItems[i];
-    if (item.type === 'video' && item.url && item.url.startsWith('data:video/')) {
-      hasLocalVideo = true;
-      break;
-    }
-  }
-  if (state.gifts.flowers.image && state.gifts.flowers.image.startsWith('data:video/')) hasLocalVideo = true;
-  if (state.gifts.earrings.image && state.gifts.earrings.image.startsWith('data:video/')) hasLocalVideo = true;
-  if (state.gifts.date.image && state.gifts.date.image.startsWith('data:video/')) hasLocalVideo = true;
+  let hasUploadFailure = false;
   
-  if (hasLocalVideo) {
-    alert("⚠️ Video files are too large to be shared in the link. Please replace the video slots with photos or YouTube links to share your page!");
-    if (saveBtn) {
-      saveBtn.disabled = false;
-      saveBtn.textContent = originalText;
-    }
-    return;
-  }
-  
-  // Compress any existing large base64 images in the state
+  // Silently upload gifts and gallery items
   try {
-    if (state.gifts.flowers.image && state.gifts.flowers.image.startsWith('data:image/')) {
-      state.gifts.flowers.image = await compressBase64Image(state.gifts.flowers.image);
-    }
-    if (state.gifts.earrings.image && state.gifts.earrings.image.startsWith('data:image/')) {
-      state.gifts.earrings.image = await compressBase64Image(state.gifts.earrings.image);
-    }
-    if (state.gifts.date.image && state.gifts.date.image.startsWith('data:image/')) {
-      state.gifts.date.image = await compressBase64Image(state.gifts.date.image);
-    }
+    await uploadAssetIfNeeded(state.gifts.flowers);
+    await uploadAssetIfNeeded(state.gifts.earrings);
+    await uploadAssetIfNeeded(state.gifts.date);
+    
     for (let i = 0; i < state.galleryItems.length; i++) {
-      const item = state.galleryItems[i];
-      if (item.url && item.url.startsWith('data:image/')) {
-        item.url = await compressBase64Image(item.url);
-      }
+      await uploadAssetIfNeeded(state.galleryItems[i]);
     }
   } catch (err) {
-    console.warn("Error compressing state images:", err);
+    console.warn("Error uploading assets:", err);
+    hasUploadFailure = true;
   }
   
   renderDom();
+  if (typeof updateGiftPreviews === 'function') updateGiftPreviews();
   
-  try{
-    const json=JSON.stringify(state);
+  try {
+    // Generate text-only JSON for url payload
+    const payloadState = {
+      badge: state.badge,
+      titleText: state.titleText,
+      subtitle: state.subtitle,
+      letterTitle: state.letterTitle,
+      letterP1: state.letterP1,
+      letterP2: state.letterP2,
+      letterSignoff: state.letterSignoff,
+      partnerName: state.partnerName,
+      balloonMessages: state.balloonMessages,
+      galleryItems: state.galleryItems.map(item => ({
+        type: item.type,
+        caption: item.caption,
+        timestamp: item.timestamp,
+        url: item.localId || item.url, // key or remote URL
+        localId: item.localId || '',
+        cdnUrl: item.cdnUrl || ''
+      })),
+      gifts: {
+        flowers: {
+          title: state.gifts.flowers.title,
+          description: state.gifts.flowers.description,
+          image: state.gifts.flowers.localId || state.gifts.flowers.image,
+          localId: state.gifts.flowers.localId || '',
+          cdnUrl: state.gifts.flowers.cdnUrl || ''
+        },
+        earrings: {
+          title: state.gifts.earrings.title,
+          description: state.gifts.earrings.description,
+          image: state.gifts.earrings.localId || state.gifts.earrings.image,
+          localId: state.gifts.earrings.localId || '',
+          cdnUrl: state.gifts.earrings.cdnUrl || ''
+        },
+        date: {
+          title: state.gifts.date.title,
+          description: state.gifts.date.description,
+          image: state.gifts.date.localId || state.gifts.date.image,
+          localId: state.gifts.date.localId || '',
+          cdnUrl: state.gifts.date.cdnUrl || '',
+          venue: state.gifts.date.venue,
+          ticketTitle: state.gifts.date.ticketTitle,
+          ticketDetails: state.gifts.date.ticketDetails,
+          ticketValidation: state.gifts.date.ticketValidation
+        }
+      }
+    };
+
+    let json = JSON.stringify(payloadState);
     try {
-      localStorage.setItem('anniversary_state', json);
+      localStorage.setItem('anniversary_state', JSON.stringify(state));
     } catch(e) {
       console.warn('Failed to save to localStorage:', e);
     }
     
     const baseUrl = window.location.origin + window.location.pathname;
-    let finalDParam;
+    let finalDParam = LZString.compressToEncodedURIComponent(json);
+    let url = baseUrl + '?d=' + finalDParam;
     
-    if (json.length > 2000) {
-      finalDParam = LZString.compressToEncodedURIComponent(json);
-    } else {
-      finalDParam = encodeURIComponent(json);
+    // Silently truncate gallery items if the URL exceeds 2000 characters
+    if (url.length > 2000 && payloadState.galleryItems.length > 1) {
+      if (warningEl) {
+        warningEl.textContent = "⚠️ Some photos were omitted/truncated to keep the link short enough to share.";
+        warningEl.style.display = 'block';
+      }
+      while (url.length > 2000 && payloadState.galleryItems.length > 1) {
+        payloadState.galleryItems.pop();
+        json = JSON.stringify(payloadState);
+        finalDParam = LZString.compressToEncodedURIComponent(json);
+        url = baseUrl + '?d=' + finalDParam;
+      }
     }
     
-    const url = baseUrl + '?d=' + finalDParam;
     const editUrl = url + '&edit=true';
     
-    if (url.length > 14000) {
-      alert("⚠️ Your customized page has too much data (usually due to a video file or too many large photos). The shareable link might be too long to load in some browsers. Please consider replacing video files with YouTube links or using fewer photos!");
-    }
-    
-    document.getElementById('share-input').value=url;
+    document.getElementById('share-input').value = url;
     const clickLink = document.getElementById('share-link-clickable');
     if (clickLink) clickLink.href = url;
     const editLink = document.getElementById('edit-link-clickable');
@@ -1800,15 +1898,76 @@ async function confirmAndShare(){
       waBtn.href = `https://api.whatsapp.com/send?text=${shareText}`;
     }
     
-    document.getElementById('share-box').style.display='block';
-    document.getElementById('copy-btn').textContent='Copy';
-  }catch(e){
-    alert('Could not generate link.');
+    if (hasUploadFailure && warningEl) {
+      warningEl.textContent = "⚠️ Warning: Some uploads failed. The link has been generated using fallbacks but may be too long.";
+      warningEl.style.display = 'block';
+    }
+    
+    document.getElementById('share-box').style.display = 'block';
+    document.getElementById('copy-btn').textContent = 'Copy';
+  } catch(e) {
+    if (warningEl) {
+      warningEl.textContent = "⚠️ Could not generate link.";
+      warningEl.style.display = 'block';
+    }
   } finally {
     if (saveBtn) {
       saveBtn.disabled = false;
       saveBtn.textContent = originalText;
     }
+  }
+}
+
+async function uploadAssetIfNeeded(itemOrGift) {
+  if (!itemOrGift) return;
+  if (itemOrGift.cdnUrl && itemOrGift.cdnUrl.startsWith('http')) {
+    return;
+  }
+  const localId = itemOrGift.localId;
+  if (!localId) return;
+  
+  try {
+    const record = await getMoment(localId);
+    if (record && record.data) {
+      if (record.type === 'video') {
+        // Videos are just encoded as compressed base64 directly as fallback since ImgBB is images-only
+        const base64Data = await compressImage(record.data);
+        itemOrGift.cdnUrl = base64Data;
+      } else {
+        try {
+          const cdnUrl = await uploadFileToCDN(record.data);
+          itemOrGift.cdnUrl = cdnUrl;
+        } catch (uploadErr) {
+          console.warn("CDN upload failed, falling back to base64:", uploadErr);
+          const base64Data = await compressImage(record.data);
+          itemOrGift.cdnUrl = base64Data;
+        }
+      }
+    }
+  } catch (err) {
+    console.error("Error retrieving local moment:", err);
+  }
+}
+
+async function uploadFileToCDN(file) {
+  const apiKey = '4c826211bb92149b0558074ff6069078';
+  const formData = new FormData();
+  formData.append('image', file);
+  
+  const response = await fetch(`https://api.imgbb.com/1/upload?key=${apiKey}`, {
+    method: 'POST',
+    body: formData
+  });
+  
+  if (!response.ok) {
+    throw new Error(`Upload failed with status ${response.status}`);
+  }
+  
+  const data = await response.json();
+  if (data && data.data && data.data.url) {
+    return data.data.url;
+  } else {
+    throw new Error('Invalid response structure');
   }
 }
 
@@ -1820,7 +1979,6 @@ function copyLink(){
 }
 
 function loadFromUrl(){
-  // Check URL query parameters first (?d=)
   const urlParams = new URLSearchParams(window.location.search);
   const dParam = urlParams.get('d');
   
@@ -1841,51 +1999,28 @@ function loadFromUrl(){
       if (!hasEditParam) {
         const editBtn = document.getElementById('edit-btn');
         if (editBtn) editBtn.style.display = 'none';
+        const customizer = document.getElementById('customizer');
+        if (customizer) {
+          customizer.classList.remove('open');
+          customizer.style.display = 'none';
+        }
       } else {
         const editBtn = document.getElementById('edit-btn');
         if (editBtn) editBtn.style.display = 'block';
         const customizer = document.getElementById('customizer');
-        if (customizer) customizer.classList.add('open');
+        if (customizer) {
+          customizer.style.display = 'block';
+          customizer.classList.add('open');
+        }
       }
-      return true; // Loaded successfully from ?d=
+      return true;
     } catch(e) {
       console.warn('URL ?d= state load failed:', e);
-    }
-  }
-  
-  // Fall back to URL hash (#data=) for backward compatibility
-  const h=window.location.hash;
-  if(h.startsWith('#data=')){
-    try{
-      const parts = h.substring(6).split('&');
-      const b64=decodeURIComponent(parts[0]);
-      const bin=atob(b64);
-      const bytes=new Uint8Array(bin.length);
-      for(let i=0;i<bin.length;i++)bytes[i]=bin.charCodeAt(i);
-      const loaded=JSON.parse(new TextDecoder().decode(bytes));
-      state={...state,...loaded};
-      
-      const hasEditParam = urlParams.get('edit') === 'true' || h.includes('edit=true');
-      if (!hasEditParam) {
-        const editBtn = document.getElementById('edit-btn');
-        if (editBtn) editBtn.style.display = 'none';
-      } else {
-        const editBtn = document.getElementById('edit-btn');
-        if (editBtn) editBtn.style.display = 'block';
-        const customizer = document.getElementById('customizer');
-        if (customizer) customizer.classList.add('open');
-      }
-      return true; // Loaded successfully from hash
-    }catch(e){
-      console.warn('URL hash state load failed:',e);
     }
   }
   return false;
 }
 
-// ═══════════════════════════════════════════════════
-// SCROLL REVEAL
-// ═══════════════════════════════════════════════════
 function setupReveal(){
   const obs=new IntersectionObserver(entries=>{
     entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('active');obs.unobserve(e.target);}});
@@ -1893,25 +2028,30 @@ function setupReveal(){
   document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
 }
 
-// ═══════════════════════════════════════════════════
-// GIFT DEVICE UPLOADER LOGIC
-// ═══════════════════════════════════════════════════
 async function handleGiftUpload(n, files) {
   if (!files || files.length === 0) return;
   const file = files[0];
+  if (file.type.startsWith('video/') && file.size > 5 * 1024 * 1024) {
+    alert("⚠️ Video too large to share — please use a YouTube link instead");
+    return;
+  }
   try {
-    const localId = await saveMoment(file);
-    const base64Data = await compressImage(file);
+    const key = 'img_' + Math.random().toString(36).substring(2, 7);
+    const localId = await saveMoment(file, null, null, key);
+    const objectUrl = URL.createObjectURL(file);
     
     if (n === 1) {
-      state.gifts.flowers.image = base64Data;
+      state.gifts.flowers.image = objectUrl;
       state.gifts.flowers.localId = localId;
+      state.gifts.flowers.cdnUrl = '';
     } else if (n === 2) {
-      state.gifts.earrings.image = base64Data;
+      state.gifts.earrings.image = objectUrl;
       state.gifts.earrings.localId = localId;
+      state.gifts.earrings.cdnUrl = '';
     } else if (n === 3) {
-      state.gifts.date.image = base64Data;
+      state.gifts.date.image = objectUrl;
       state.gifts.date.localId = localId;
+      state.gifts.date.cdnUrl = '';
     }
     
     updateGiftPreviews();
@@ -1962,9 +2102,6 @@ function updateGiftPreviews() {
   }
 }
 
-// ═══════════════════════════════════════════════════
-// INDEXEDDB PERSISTENCE
-// ═══════════════════════════════════════════════════
 const DB_NAME = 'AnniversaryMomentsDB';
 const STORE_NAME = 'moments';
 
@@ -1982,20 +2119,34 @@ function initDB() {
   });
 }
 
-function saveMoment(file, caption, timestamp) {
+function saveMoment(file, caption, timestamp, customId) {
+  const recordId = customId || ('img_' + Math.random().toString(36).substring(2, 7));
   return initDB().then(db => {
     return new Promise((resolve, reject) => {
       const transaction = db.transaction(STORE_NAME, 'readwrite');
       const store = transaction.objectStore(STORE_NAME);
       const record = {
+        id: recordId,
         name: file.name,
         type: file.type.startsWith('video') ? 'video' : 'image',
-        data: file, // File object is directly serializable/storable in IndexedDB!
+        data: file,
         caption: caption || file.name.split('.')[0],
         timestamp: timestamp || new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
         addedAt: Date.now()
       };
-      const req = store.add(record);
+      const req = store.put(record);
+      req.onsuccess = () => resolve(recordId);
+      req.onerror = () => reject(req.target.error);
+    });
+  });
+}
+
+function getMoment(id) {
+  return initDB().then(db => {
+    return new Promise((resolve, reject) => {
+      const transaction = db.transaction(STORE_NAME, 'readonly');
+      const store = transaction.objectStore(STORE_NAME);
+      const req = store.get(id);
       req.onsuccess = () => resolve(req.result);
       req.onerror = () => reject(req.target.error);
     });
@@ -2026,9 +2177,6 @@ function deleteMoment(id) {
   });
 }
 
-// ═══════════════════════════════════════════════════
-// FILE UPLOAD ZONE LOGIC
-// ═══════════════════════════════════════════════════
 function initUpload() {
   const input = document.getElementById('file-upload-input');
   const zone = document.getElementById('upload-zone');
@@ -2039,7 +2187,6 @@ function initUpload() {
     input.click();
   });
   
-  // Drag and drop
   zone.addEventListener('dragover', (e) => {
     e.preventDefault();
     zone.classList.add('upload-zone-active');
@@ -2066,6 +2213,29 @@ function initUpload() {
   });
 }
 
+async function handleSlotUpload(index, files) {
+  if (!files || files.length === 0) return;
+  const file = files[0];
+  if (file.type.startsWith('video/') && file.size > 5 * 1024 * 1024) {
+    alert("⚠️ Video too large to share — please use a YouTube link instead");
+    return;
+  }
+  try {
+    const key = 'img_' + Math.random().toString(36).substring(2, 7);
+    const localId = await saveMoment(file, null, null, key);
+    
+    state.galleryItems[index].url = URL.createObjectURL(file);
+    state.galleryItems[index].type = file.type.startsWith('video') ? 'video' : 'image';
+    state.galleryItems[index].localId = localId;
+    state.galleryItems[index].cdnUrl = '';
+    
+    renderGalleryInputs();
+    renderGallery();
+  } catch (err) {
+    console.error("Error saving slot file:", err);
+  }
+}
+
 async function handleFiles(files) {
   const icon = document.getElementById('upload-icon');
   const title = document.getElementById('upload-title');
@@ -2088,16 +2258,21 @@ async function handleFiles(files) {
   }
   for (let i = 0; i < files.length; i++) {
     const file = files[i];
+    if (file.type.startsWith('video/') && file.size > 5 * 1024 * 1024) {
+      alert(`⚠️ Video "${file.name}" is too large to share — please use a YouTube link instead`);
+      continue;
+    }
     try {
-      const localId = await saveMoment(file);
-      const base64Data = await compressImage(file);
+      const key = 'img_' + Math.random().toString(36).substring(2, 7);
+      const localId = await saveMoment(file, file.name.split('.')[0], new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' }), key);
       
       state.galleryItems.push({
         type: file.type.startsWith('video') ? 'video' : 'image',
-        url: base64Data,
+        url: URL.createObjectURL(file),
         caption: file.name.split('.')[0],
         timestamp: new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
-        localId: localId
+        localId: localId,
+        cdnUrl: ''
       });
     } catch (err) {
       console.error("Error saving file:", err);
@@ -2719,21 +2894,83 @@ function closeProposalOverlay() {
 
 // ═══════════════════════════════════════════════════
 window.addEventListener('DOMContentLoaded', async () => {
-  const loadedFromUrl = loadFromUrl(); // Load state from URL (query or hash) first!
-  window.addEventListener('hashchange', () => {
-    loadFromUrl();
-    renderDom();
-  });
-  
-  // Auto-open customizer if edit=true is present in URL
+  // Suppress/hide defaults if sharing is present
   const urlParams = new URLSearchParams(window.location.search);
-  if (urlParams.get('edit') === 'true') {
-    const customizer = document.getElementById('customizer');
-    if (customizer) customizer.classList.add('open');
+  const dParam = urlParams.get('d');
+  let loadedFromUrl = false;
+  
+  if (dParam) {
+    loadedFromUrl = loadFromUrl();
   }
   
-  if (!loadedFromUrl) {
-    // Fall back to localStorage (for editor's own saved state)
+  if (loadedFromUrl) {
+    // Shared page: Hydrate from IndexedDB if matches local key, otherwise CDN URL
+    try {
+      const saved = await loadMoments();
+      const savedMap = {};
+      if (saved) {
+        saved.forEach(record => {
+          savedMap[record.id] = record;
+        });
+      }
+      
+      // Hydrate flowers
+      if (state.gifts.flowers.localId && savedMap[state.gifts.flowers.localId]) {
+        state.gifts.flowers.image = URL.createObjectURL(savedMap[state.gifts.flowers.localId].data);
+      } else if (state.gifts.flowers.cdnUrl) {
+        state.gifts.flowers.image = state.gifts.flowers.cdnUrl;
+      }
+      
+      // Hydrate earrings
+      if (state.gifts.earrings.localId && savedMap[state.gifts.earrings.localId]) {
+        state.gifts.earrings.image = URL.createObjectURL(savedMap[state.gifts.earrings.localId].data);
+      } else if (state.gifts.earrings.cdnUrl) {
+        state.gifts.earrings.image = state.gifts.earrings.cdnUrl;
+      }
+      
+      // Hydrate date
+      if (state.gifts.date.localId && savedMap[state.gifts.date.localId]) {
+        state.gifts.date.image = URL.createObjectURL(savedMap[state.gifts.date.localId].data);
+      } else if (state.gifts.date.cdnUrl) {
+        state.gifts.date.image = state.gifts.date.cdnUrl;
+      }
+      
+      // Hydrate gallery items
+      state.galleryItems.forEach(item => {
+        if (item.localId && savedMap[item.localId]) {
+          item.url = URL.createObjectURL(savedMap[item.localId].data);
+        } else if (item.cdnUrl) {
+          item.url = item.cdnUrl;
+        }
+      });
+      
+      // Filter defaults
+      state.galleryItems = state.galleryItems.filter(item => item.url && !item.url.startsWith('https://picsum.photos/'));
+      
+      // Filter default balloon messages
+      const defaultBalloons = [
+        "I love the way your eyes sparkle when you are genuinely happy. ✨",
+        "Happy Anniversary! You are the absolute best thing that ever happened to me. 💖",
+        "I'm sorry for being stubborn sometimes. I promise to listen closer and hold you tighter. 🌸",
+        "My favourite place in the entire world is next to you, laughing at nothing. 💫",
+        "You are my sweet girl, my best friend, and my greatest adventure. Happy 1 Year! 🌹"
+      ];
+      const isDefaultBalloons = state.balloonMessages.length === defaultBalloons.length &&
+        state.balloonMessages.every((val, idx) => val === defaultBalloons[idx]);
+      if (isDefaultBalloons) {
+        state.balloonMessages = [];
+      }
+    } catch (e) {
+      console.warn("Could not hydrate moments from IndexedDB:", e);
+      if (state.gifts.flowers.cdnUrl) state.gifts.flowers.image = state.gifts.flowers.cdnUrl;
+      if (state.gifts.earrings.cdnUrl) state.gifts.earrings.image = state.gifts.earrings.cdnUrl;
+      if (state.gifts.date.cdnUrl) state.gifts.date.image = state.gifts.date.cdnUrl;
+      state.galleryItems.forEach(item => {
+        if (item.cdnUrl) item.url = item.cdnUrl;
+      });
+    }
+  } else {
+    // Normal editor mode: Fall back to localStorage (editor's own saved state)
     try {
       const localSaved = localStorage.getItem('anniversary_state');
       if (localSaved) {
@@ -2744,7 +2981,7 @@ window.addEventListener('DOMContentLoaded', async () => {
       console.warn("Failed to load state from localStorage:", e);
     }
     
-    // Try loading local moments from IndexedDB
+    // Load local moments from IndexedDB
     try {
       const saved = await loadMoments();
       if (saved && saved.length > 0) {
@@ -2753,61 +2990,36 @@ window.addEventListener('DOMContentLoaded', async () => {
           savedMap[record.id] = record;
         });
         
-        // 1. Restore/assign local Object URLs to gifts (if they are not already base64)
+        // Restore local Object URLs
         if (state.gifts.flowers.localId && savedMap[state.gifts.flowers.localId]) {
-          if (!state.gifts.flowers.image || !state.gifts.flowers.image.startsWith('data:')) {
-            state.gifts.flowers.image = URL.createObjectURL(savedMap[state.gifts.flowers.localId].data);
-          }
+          state.gifts.flowers.image = URL.createObjectURL(savedMap[state.gifts.flowers.localId].data);
         }
         if (state.gifts.earrings.localId && savedMap[state.gifts.earrings.localId]) {
-          if (!state.gifts.earrings.image || !state.gifts.earrings.image.startsWith('data:')) {
-            state.gifts.earrings.image = URL.createObjectURL(savedMap[state.gifts.earrings.localId].data);
-          }
+          state.gifts.earrings.image = URL.createObjectURL(savedMap[state.gifts.earrings.localId].data);
         }
         if (state.gifts.date.localId && savedMap[state.gifts.date.localId]) {
-          if (!state.gifts.date.image || !state.gifts.date.image.startsWith('data:')) {
-            state.gifts.date.image = URL.createObjectURL(savedMap[state.gifts.date.localId].data);
-          }
+          state.gifts.date.image = URL.createObjectURL(savedMap[state.gifts.date.localId].data);
         }
         
-        // 2. Restore/assign local Object URLs to gallery items
-        const hasSavedGallery = saved.some(record => 
-          record.id !== state.gifts.flowers.localId && 
-          record.id !== state.gifts.earrings.localId && 
-          record.id !== state.gifts.date.localId
-        );
-        if (hasSavedGallery) {
-          state.galleryItems = state.galleryItems.filter(item => item.localId || (item.url && item.url.startsWith('data:')));
-        }
-        saved.forEach(record => {
-          // Skip if this record is a gift
-          if (record.id === state.gifts.flowers.localId || 
-              record.id === state.gifts.earrings.localId || 
-              record.id === state.gifts.date.localId) {
-            return;
-          }
-          
-          const objectUrl = URL.createObjectURL(record.data);
-          // Check if already in state.galleryItems
-          const existingItem = state.galleryItems.find(item => item.localId === record.id);
-          if (existingItem) {
-            if (!existingItem.url || !existingItem.url.startsWith('data:')) {
-              existingItem.url = objectUrl;
-            }
-          } else {
-            // Newly added local item, append it
-            state.galleryItems.push({
-              type: record.type,
-              url: objectUrl,
-              caption: record.caption,
-              timestamp: record.timestamp,
-              localId: record.id
-            });
+        // Restore gallery items
+        state.galleryItems.forEach(item => {
+          if (item.localId && savedMap[item.localId]) {
+            item.url = URL.createObjectURL(savedMap[item.localId].data);
           }
         });
       }
     } catch (e) {
       console.warn("Could not load local moments from IndexedDB:", e);
+    }
+  }
+  
+  // Hide balloon section if no messages
+  const balloonSec = document.getElementById('balloon-section');
+  if (balloonSec) {
+    if (state.balloonMessages.length === 0) {
+      balloonSec.style.display = 'none';
+    } else {
+      balloonSec.style.display = 'block';
     }
   }
 
@@ -2816,6 +3028,14 @@ window.addEventListener('DOMContentLoaded', async () => {
   setupReveal();
   initUpload();
   updateProgress();
+  
+  // Hide loader overlay and reveal body content
+  document.documentElement.classList.remove('loading-state');
+  const spinner = document.getElementById('loading-spinner-overlay');
+  if (spinner) {
+    spinner.style.opacity = '0';
+    setTimeout(() => spinner.remove(), 500);
+  }
 
   // Auto-open Spotify drawer with Yun Hi
   setTimeout(() => {
