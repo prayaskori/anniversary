@@ -1377,10 +1377,14 @@ function renderGallery(){
   
   const urlParams = new URLSearchParams(window.location.search);
   const isShared = urlParams.has('d');
+  const hasEditParam = urlParams.get('edit') === 'true';
   
+  let renderedCount = 0;
   state.galleryItems.forEach((item,idx)=>{
     if (!item.url) return;
-    if (isShared && item.url.startsWith('https://picsum.photos/')) return;
+    if (isShared && !hasEditParam && item.url.startsWith('https://picsum.photos/')) return;
+    
+    renderedCount++;
     
     const card=document.createElement('div');
     card.className='gallery-card';
@@ -1402,6 +1406,15 @@ function renderGallery(){
     `;
     grid.appendChild(card);
   });
+  
+  const gallerySec = document.getElementById('gallery-section');
+  if (gallerySec) {
+    if (renderedCount === 0) {
+      gallerySec.style.display = 'none';
+    } else {
+      gallerySec.style.display = 'block';
+    }
+  }
 }
 
 // ═══════════════════════════════════════════════════
@@ -1467,9 +1480,7 @@ function showGiftModal(n){
   const urlParams = new URLSearchParams(window.location.search);
   const isShared = urlParams.has('d');
   
-  if (isShared && giftImgUrl && giftImgUrl.startsWith('https://images.unsplash.com/')) {
-    giftImgUrl = '';
-  }
+  // Leave default Unsplash images intact so modals don't look blank and broken!
   
   if (giftImgUrl) {
     img.src = giftImgUrl;
@@ -2303,7 +2314,7 @@ function updateProgress() {
     progress.envelope = true;
   }
   
-  if (poppedCount >= state.balloonMessages.length && state.balloonMessages.length > 0) {
+  if (state.balloonMessages.length === 0 || poppedCount >= state.balloonMessages.length) {
     progress.balloons = true;
   }
   
@@ -2323,10 +2334,15 @@ function updateProgress() {
   }
   
   if (chkBalloons) {
-    chkBalloons.querySelector('.chk-status').textContent = progress.balloons ? '✓' : '○';
-    chkBalloons.style.color = progress.balloons ? 'var(--rose-dk)' : 'var(--muted)';
-    chkBalloons.style.borderColor = progress.balloons ? 'var(--rose)' : '#eee';
-    chkBalloons.style.background = progress.balloons ? 'var(--rose-lt)' : '#fff';
+    if (state.balloonMessages.length === 0) {
+      chkBalloons.style.display = 'none';
+    } else {
+      chkBalloons.style.display = 'flex';
+      chkBalloons.querySelector('.chk-status').textContent = progress.balloons ? '✓' : '○';
+      chkBalloons.style.color = progress.balloons ? 'var(--rose-dk)' : 'var(--muted)';
+      chkBalloons.style.borderColor = progress.balloons ? 'var(--rose)' : '#eee';
+      chkBalloons.style.background = progress.balloons ? 'var(--rose-lt)' : '#fff';
+    }
   }
   
   if (chkGifts) {
@@ -2897,6 +2913,7 @@ window.addEventListener('DOMContentLoaded', async () => {
   // Suppress/hide defaults if sharing is present
   const urlParams = new URLSearchParams(window.location.search);
   const dParam = urlParams.get('d');
+  const hasEditParam = urlParams.get('edit') === 'true';
   let loadedFromUrl = false;
   
   if (dParam) {
@@ -2944,22 +2961,12 @@ window.addEventListener('DOMContentLoaded', async () => {
         }
       });
       
-      // Filter defaults
-      state.galleryItems = state.galleryItems.filter(item => item.url && !item.url.startsWith('https://picsum.photos/'));
-      
-      // Filter default balloon messages
-      const defaultBalloons = [
-        "I love the way your eyes sparkle when you are genuinely happy. ✨",
-        "Happy Anniversary! You are the absolute best thing that ever happened to me. 💖",
-        "I'm sorry for being stubborn sometimes. I promise to listen closer and hold you tighter. 🌸",
-        "My favourite place in the entire world is next to you, laughing at nothing. 💫",
-        "You are my sweet girl, my best friend, and my greatest adventure. Happy 1 Year! 🌹"
-      ];
-      const isDefaultBalloons = state.balloonMessages.length === defaultBalloons.length &&
-        state.balloonMessages.every((val, idx) => val === defaultBalloons[idx]);
-      if (isDefaultBalloons) {
-        state.balloonMessages = [];
+      // Filter defaults for recipients only
+      if (!hasEditParam) {
+        state.galleryItems = state.galleryItems.filter(item => item.url && !item.url.startsWith('https://picsum.photos/'));
       }
+      
+      // Do not automatically clear default balloon messages so the recipient/editor still has a working balloon game!
     } catch (e) {
       console.warn("Could not hydrate moments from IndexedDB:", e);
       if (state.gifts.flowers.cdnUrl) state.gifts.flowers.image = state.gifts.flowers.cdnUrl;
