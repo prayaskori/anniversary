@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Happy Anniversary, My Love 💕</title>
 <meta name="description" content="A personal anniversary and apology page made with love.">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.4.4/lz-string.min.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@500;700&family=Playfair+Display:ital,wght@0,400;0,600;1,400;1,600&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -1563,14 +1564,23 @@ function renderGalleryInputs(){
   });
 }
 
+function fileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = error => reject(error);
+  });
+}
+
 async function handleSlotUpload(index, files) {
   if (!files || files.length === 0) return;
   const file = files[0];
   try {
     const localId = await saveMoment(file);
-    const objectUrl = URL.createObjectURL(file);
+    const base64Data = await fileToBase64(file);
     
-    state.galleryItems[index].url = objectUrl;
+    state.galleryItems[index].url = base64Data;
     state.galleryItems[index].type = file.type.startsWith('video') ? 'video' : 'image';
     state.galleryItems[index].localId = localId;
     
@@ -1582,6 +1592,10 @@ async function handleSlotUpload(index, files) {
 }
 
 function addGalleryItem(type){
+  const hasCustom = state.galleryItems.some(item => item.localId || (item.url && item.url.startsWith('data:')));
+  if (!hasCustom) {
+    state.galleryItems = [];
+  }
   state.galleryItems.push({type,url:'',caption:'',timestamp:''});
   renderGalleryInputs();
 }
@@ -1622,15 +1636,28 @@ function confirmAndShare(){
   readInputs();renderDom();
   try{
     const json=JSON.stringify(state);
-    const bytes=new TextEncoder().encode(json);
-    let bin='';bytes.forEach(b=>bin+=String.fromCharCode(b));
-    const b64=btoa(bin);
-    const url=window.location.origin+window.location.pathname+'#data='+encodeURIComponent(b64);
+    try {
+      localStorage.setItem('anniversary_state', json);
+    } catch(e) {
+      console.warn('Failed to save to localStorage:', e);
+    }
+    
+    const baseUrl = window.location.origin + window.location.pathname;
+    const rawEncoded = encodeURIComponent(json);
+    let finalDParam = rawEncoded;
+    
+    if ((baseUrl + '?d=' + rawEncoded).length > 8000) {
+      finalDParam = LZString.compressToEncodedURIComponent(json);
+    }
+    
+    const url = baseUrl + '?d=' + finalDParam;
+    const editUrl = url + '&edit=true';
+    
     document.getElementById('share-input').value=url;
     const clickLink = document.getElementById('share-link-clickable');
     if (clickLink) clickLink.href = url;
     const editLink = document.getElementById('edit-link-clickable');
-    if (editLink) editLink.href = url + '&edit=true';
+    if (editLink) editLink.href = editUrl;
     
     // Set WhatsApp Share Link
     const waBtn = document.getElementById('wa-share-btn');
@@ -1652,25 +1679,67 @@ function copyLink(){
 }
 
 function loadFromUrl(){
-  const h=window.location.hash;
-  if(!h.startsWith('#data='))return;
-  try{
-    const parts = h.substring(6).split('&');
-    const b64=decodeURIComponent(parts[0]);
-    const bin=atob(b64);
-    const bytes=new Uint8Array(bin.length);
-    for(let i=0;i<bin.length;i++)bytes[i]=bin.charCodeAt(i);
-    const loaded=JSON.parse(new TextDecoder().decode(bytes));
-    state={...state,...loaded};
-    
-    const urlParams = new URLSearchParams(window.location.search);
-    const hasEditParam = urlParams.get('edit') === 'true' || h.includes('edit=true');
-    if (!hasEditParam) {
-      document.getElementById('edit-btn').style.display='none';
-    } else {
-      document.getElementById('edit-btn').style.display='block';
+  // Check URL query parameters first (?d=)
+  const urlParams = new URLSearchParams(window.location.search);
+  const dParam = urlParams.get('d');
+  
+  if (dParam) {
+    try {
+      let decodedJson;
+      if (dParam.trim().startsWith('{')) {
+        decodedJson = dParam;
+      } else {
+        decodedJson = LZString.decompressFromEncodedURIComponent(dParam);
+      }
+      if (decodedJson) {
+        const loaded = JSON.parse(decodedJson);
+        state = { ...state, ...loaded };
+      }
+      
+      const hasEditParam = urlParams.get('edit') === 'true';
+      if (!hasEditParam) {
+        const editBtn = document.getElementById('edit-btn');
+        if (editBtn) editBtn.style.display = 'none';
+      } else {
+        const editBtn = document.getElementById('edit-btn');
+        if (editBtn) editBtn.style.display = 'block';
+        const customizer = document.getElementById('customizer');
+        if (customizer) customizer.classList.add('open');
+      }
+      return true; // Loaded successfully from ?d=
+    } catch(e) {
+      console.warn('URL ?d= state load failed:', e);
     }
-  }catch(e){console.warn('URL state load failed:',e);}
+  }
+  
+  // Fall back to URL hash (#data=) for backward compatibility
+  const h=window.location.hash;
+  if(h.startsWith('#data=')){
+    try{
+      const parts = h.substring(6).split('&');
+      const b64=decodeURIComponent(parts[0]);
+      const bin=atob(b64);
+      const bytes=new Uint8Array(bin.length);
+      for(let i=0;i<bin.length;i++)bytes[i]=bin.charCodeAt(i);
+      const loaded=JSON.parse(new TextDecoder().decode(bytes));
+      state={...state,...loaded};
+      
+      const hasEditParam = urlParams.get('edit') === 'true' || h.includes('edit=true');
+      if (!hasEditParam) {
+        const editBtn = document.getElementById('edit-btn');
+        if (editBtn) editBtn.style.display = 'none';
+      } else {
+        const editBtn = document.getElementById('edit-btn');
+        if (editBtn) editBtn.style.display = 'block';
+        const customizer = document.getElementById('customizer');
+        if (customizer) customizer.classList.add('open');
+      }
+      return true; // Loaded successfully from hash
+    }catch(e){
+      console.warn('URL hash state load failed:',e);
+    }
+  }
+  return false;
 }
 
 // ═══════════════════════════════════════════════════
@@ -1691,16 +1760,16 @@ async function handleGiftUpload(n, files) {
   const file = files[0];
   try {
     const localId = await saveMoment(file);
-    const objectUrl = URL.createObjectURL(file);
+    const base64Data = await fileToBase64(file);
     
     if (n === 1) {
-      state.gifts.flowers.image = objectUrl;
+      state.gifts.flowers.image = base64Data;
       state.gifts.flowers.localId = localId;
     } else if (n === 2) {
-      state.gifts.earrings.image = objectUrl;
+      state.gifts.earrings.image = base64Data;
       state.gifts.earrings.localId = localId;
     } else if (n === 3) {
-      state.gifts.date.image = objectUrl;
+      state.gifts.date.image = base64Data;
       state.gifts.date.localId = localId;
     }
     
@@ -1872,15 +1941,19 @@ async function handleFiles(files) {
   title.textContent = 'Processing Uploads...';
   desc.textContent = 'Saving memories to your device storage...';
   
+  const hasCustom = state.galleryItems.some(item => item.localId || (item.url && item.url.startsWith('data:')));
+  if (!hasCustom) {
+    state.galleryItems = [];
+  }
   for (let i = 0; i < files.length; i++) {
     const file = files[i];
     try {
       const localId = await saveMoment(file);
-      const objectUrl = URL.createObjectURL(file);
+      const base64Data = await fileToBase64(file);
       
       state.galleryItems.push({
         type: file.type.startsWith('video') ? 'video' : 'image',
-        url: objectUrl,
+        url: base64Data,
         caption: file.name.split('.')[0],
         timestamp: new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
         localId: localId
@@ -2505,60 +2578,96 @@ function closeProposalOverlay() {
 
 // ═══════════════════════════════════════════════════
 window.addEventListener('DOMContentLoaded', async () => {
-  loadFromUrl(); // Load state from URL hash first!
+  const loadedFromUrl = loadFromUrl(); // Load state from URL (query or hash) first!
   window.addEventListener('hashchange', () => {
     loadFromUrl();
     renderDom();
   });
   
-  // Try loading local moments from IndexedDB
-  try {
-    const saved = await loadMoments();
-    if (saved && saved.length > 0) {
-      const savedMap = {};
-      saved.forEach(record => {
-        savedMap[record.id] = record;
-      });
-      
-      // 1. Restore/assign local Object URLs to gifts
-      if (state.gifts.flowers.localId && savedMap[state.gifts.flowers.localId]) {
-        state.gifts.flowers.image = URL.createObjectURL(savedMap[state.gifts.flowers.localId].data);
+  // Auto-open customizer if edit=true is present in URL
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('edit') === 'true') {
+    const customizer = document.getElementById('customizer');
+    if (customizer) customizer.classList.add('open');
+  }
+  
+  if (!loadedFromUrl) {
+    // Fall back to localStorage (for editor's own saved state)
+    try {
+      const localSaved = localStorage.getItem('anniversary_state');
+      if (localSaved) {
+        const loaded = JSON.parse(localSaved);
+        state = { ...state, ...loaded };
       }
-      if (state.gifts.earrings.localId && savedMap[state.gifts.earrings.localId]) {
-        state.gifts.earrings.image = URL.createObjectURL(savedMap[state.gifts.earrings.localId].data);
-      }
-      if (state.gifts.date.localId && savedMap[state.gifts.date.localId]) {
-        state.gifts.date.image = URL.createObjectURL(savedMap[state.gifts.date.localId].data);
-      }
-      
-      // 2. Restore/assign local Object URLs to gallery items
-      saved.forEach(record => {
-        // Skip if this record is a gift
-        if (record.id === state.gifts.flowers.localId || 
-            record.id === state.gifts.earrings.localId || 
-            record.id === state.gifts.date.localId) {
-          return;
+    } catch (e) {
+      console.warn("Failed to load state from localStorage:", e);
+    }
+    
+    // Try loading local moments from IndexedDB
+    try {
+      const saved = await loadMoments();
+      if (saved && saved.length > 0) {
+        const savedMap = {};
+        saved.forEach(record => {
+          savedMap[record.id] = record;
+        });
+        
+        // 1. Restore/assign local Object URLs to gifts (if they are not already base64)
+        if (state.gifts.flowers.localId && savedMap[state.gifts.flowers.localId]) {
+          if (!state.gifts.flowers.image || !state.gifts.flowers.image.startsWith('data:')) {
+            state.gifts.flowers.image = URL.createObjectURL(savedMap[state.gifts.flowers.localId].data);
+          }
+        }
+        if (state.gifts.earrings.localId && savedMap[state.gifts.earrings.localId]) {
+          if (!state.gifts.earrings.image || !state.gifts.earrings.image.startsWith('data:')) {
+            state.gifts.earrings.image = URL.createObjectURL(savedMap[state.gifts.earrings.localId].data);
+          }
+        }
+        if (state.gifts.date.localId && savedMap[state.gifts.date.localId]) {
+          if (!state.gifts.date.image || !state.gifts.date.image.startsWith('data:')) {
+            state.gifts.date.image = URL.createObjectURL(savedMap[state.gifts.date.localId].data);
+          }
         }
         
-        const objectUrl = URL.createObjectURL(record.data);
-        // Check if already in state.galleryItems
-        const existingItem = state.galleryItems.find(item => item.localId === record.id);
-        if (existingItem) {
-          existingItem.url = objectUrl;
-        } else {
-          // Newly added local item, append it
-          state.galleryItems.push({
-            type: record.type,
-            url: objectUrl,
-            caption: record.caption,
-            timestamp: record.timestamp,
-            localId: record.id
-          });
+        // 2. Restore/assign local Object URLs to gallery items
+        const hasSavedGallery = saved.some(record => 
+          record.id !== state.gifts.flowers.localId && 
+          record.id !== state.gifts.earrings.localId && 
+          record.id !== state.gifts.date.localId
+        );
+        if (hasSavedGallery) {
+          state.galleryItems = state.galleryItems.filter(item => item.localId || (item.url && item.url.startsWith('data:')));
         }
-      });
+        saved.forEach(record => {
+          // Skip if this record is a gift
+          if (record.id === state.gifts.flowers.localId || 
+              record.id === state.gifts.earrings.localId || 
+              record.id === state.gifts.date.localId) {
+            return;
+          }
+          
+          const objectUrl = URL.createObjectURL(record.data);
+          // Check if already in state.galleryItems
+          const existingItem = state.galleryItems.find(item => item.localId === record.id);
+          if (existingItem) {
+            if (!existingItem.url || !existingItem.url.startsWith('data:')) {
+              existingItem.url = objectUrl;
+            }
+          } else {
+            // Newly added local item, append it
+            state.galleryItems.push({
+              type: record.type,
+              url: objectUrl,
+              caption: record.caption,
+              timestamp: record.timestamp,
+              localId: record.id
+            });
+          }
+        });
+      }
+    } catch (e) {
+      console.warn("Could not load local moments from IndexedDB:", e);
     }
-  } catch (e) {
-    console.warn("Could not load local moments from IndexedDB:", e);
   }
 
   renderDom();
