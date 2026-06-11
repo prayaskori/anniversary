@@ -1612,6 +1612,43 @@ function compressImage(file, maxWidth = 800, maxHeight = 800, quality = 0.6) {
   });
 }
 
+function compressBase64Image(dataUrl, maxWidth = 800, maxHeight = 800, quality = 0.6) {
+  return new Promise((resolve) => {
+    if (!dataUrl || !dataUrl.startsWith('data:image/')) {
+      resolve(dataUrl);
+      return;
+    }
+    if (dataUrl.length < 50000) {
+      resolve(dataUrl);
+      return;
+    }
+    const img = new Image();
+    img.src = dataUrl;
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      let width = img.width;
+      let height = img.height;
+      if (width > height) {
+        if (width > maxWidth) {
+          height = Math.round((height * maxWidth) / width);
+          width = maxWidth;
+        }
+      } else {
+        if (height > maxHeight) {
+          width = Math.round((width * maxHeight) / height);
+          height = maxHeight;
+        }
+      }
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, width, height);
+      resolve(canvas.toDataURL('image/jpeg', quality));
+    };
+    img.onerror = () => resolve(dataUrl);
+  });
+}
+
 async function handleSlotUpload(index, files) {
   if (!files || files.length === 0) return;
   const file = files[0];
@@ -1671,8 +1708,39 @@ function readInputs(){
   document.querySelectorAll('.g-ts').forEach(el=>{const i=parseInt(el.dataset.i);state.galleryItems[i].timestamp=el.value;});
 }
 
-function confirmAndShare(){
-  readInputs();renderDom();
+async function confirmAndShare(){
+  const saveBtn = document.querySelector('.confirm-btn');
+  const originalText = saveBtn ? saveBtn.textContent : '✓ Save & Get Shareable Link';
+  if (saveBtn) {
+    saveBtn.disabled = true;
+    saveBtn.textContent = '⏳ Compressing & Saving...';
+  }
+  
+  readInputs();
+  
+  // Compress any existing large base64 images in the state
+  try {
+    if (state.gifts.flowers.image && state.gifts.flowers.image.startsWith('data:image/')) {
+      state.gifts.flowers.image = await compressBase64Image(state.gifts.flowers.image);
+    }
+    if (state.gifts.earrings.image && state.gifts.earrings.image.startsWith('data:image/')) {
+      state.gifts.earrings.image = await compressBase64Image(state.gifts.earrings.image);
+    }
+    if (state.gifts.date.image && state.gifts.date.image.startsWith('data:image/')) {
+      state.gifts.date.image = await compressBase64Image(state.gifts.date.image);
+    }
+    for (let i = 0; i < state.galleryItems.length; i++) {
+      const item = state.galleryItems[i];
+      if (item.url && item.url.startsWith('data:image/')) {
+        item.url = await compressBase64Image(item.url);
+      }
+    }
+  } catch (err) {
+    console.warn("Error compressing state images:", err);
+  }
+  
+  renderDom();
+  
   try{
     const json=JSON.stringify(state);
     try {
@@ -1682,15 +1750,20 @@ function confirmAndShare(){
     }
     
     const baseUrl = window.location.origin + window.location.pathname;
-    const rawEncoded = encodeURIComponent(json);
-    let finalDParam = rawEncoded;
+    let finalDParam;
     
-    if ((baseUrl + '?d=' + rawEncoded).length > 8000) {
+    if (json.length > 2000) {
       finalDParam = LZString.compressToEncodedURIComponent(json);
+    } else {
+      finalDParam = encodeURIComponent(json);
     }
     
     const url = baseUrl + '?d=' + finalDParam;
     const editUrl = url + '&edit=true';
+    
+    if (url.length > 14000) {
+      alert("⚠️ Your customized page has too much data (usually due to a video file or too many large photos). The shareable link might be too long to load in some browsers. Please consider replacing video files with YouTube links or using fewer photos!");
+    }
     
     document.getElementById('share-input').value=url;
     const clickLink = document.getElementById('share-link-clickable');
@@ -1707,7 +1780,14 @@ function confirmAndShare(){
     
     document.getElementById('share-box').style.display='block';
     document.getElementById('copy-btn').textContent='Copy';
-  }catch(e){alert('Could not generate link.');}
+  }catch(e){
+    alert('Could not generate link.');
+  } finally {
+    if (saveBtn) {
+      saveBtn.disabled = false;
+      saveBtn.textContent = originalText;
+    }
+  }
 }
 
 function copyLink(){
