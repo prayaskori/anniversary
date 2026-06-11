@@ -1573,7 +1573,7 @@ function fileToBase64(file) {
   });
 }
 
-function compressImage(file, maxWidth = 800, maxHeight = 800, quality = 0.6) {
+function compressImage(file, maxWidth = 400, maxHeight = 400, quality = 0.5) {
   return new Promise((resolve, reject) => {
     if (!file.type.startsWith('image/')) {
       fileToBase64(file).then(resolve).catch(reject);
@@ -1612,13 +1612,13 @@ function compressImage(file, maxWidth = 800, maxHeight = 800, quality = 0.6) {
   });
 }
 
-function compressBase64Image(dataUrl, maxWidth = 800, maxHeight = 800, quality = 0.6) {
+function compressBase64Image(dataUrl, maxWidth = 400, maxHeight = 400, quality = 0.5) {
   return new Promise((resolve) => {
     if (!dataUrl || !dataUrl.startsWith('data:image/')) {
       resolve(dataUrl);
       return;
     }
-    if (dataUrl.length < 50000) {
+    if (dataUrl.length < 15000) {
       resolve(dataUrl);
       return;
     }
@@ -1717,6 +1717,28 @@ async function confirmAndShare(){
   }
   
   readInputs();
+  
+  // Check for local video files (which are too large for URL sharing)
+  let hasLocalVideo = false;
+  for (let i = 0; i < state.galleryItems.length; i++) {
+    const item = state.galleryItems[i];
+    if (item.type === 'video' && item.url && item.url.startsWith('data:video/')) {
+      hasLocalVideo = true;
+      break;
+    }
+  }
+  if (state.gifts.flowers.image && state.gifts.flowers.image.startsWith('data:video/')) hasLocalVideo = true;
+  if (state.gifts.earrings.image && state.gifts.earrings.image.startsWith('data:video/')) hasLocalVideo = true;
+  if (state.gifts.date.image && state.gifts.date.image.startsWith('data:video/')) hasLocalVideo = true;
+  
+  if (hasLocalVideo) {
+    alert("⚠️ Video files are too large to be shared in the link. Please replace the video slots with photos or YouTube links to share your page!");
+    if (saveBtn) {
+      saveBtn.disabled = false;
+      saveBtn.textContent = originalText;
+    }
+    return;
+  }
   
   // Compress any existing large base64 images in the state
   try {
