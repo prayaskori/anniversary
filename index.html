@@ -1725,27 +1725,11 @@ function compressBase64Image(dataUrl, maxWidth = 400, maxHeight = 400, quality =
   });
 }
 
-async function handleSlotUpload(index, files) {
-  if (!files || files.length === 0) return;
-  const file = files[0];
-  try {
-    const localId = await saveMoment(file);
-    const base64Data = await compressImage(file);
-    
-    state.galleryItems[index].url = base64Data;
-    state.galleryItems[index].type = file.type.startsWith('video') ? 'video' : 'image';
-    state.galleryItems[index].localId = localId;
-    
-    renderGalleryInputs();
-    renderGallery();
-  } catch (err) {
-    console.error("Error saving slot file:", err);
-  }
-}
+
 
 function addGalleryItem(type){
-  const hasCustom = state.galleryItems.some(item => item.localId || (item.url && item.url.startsWith('data:')));
-  if (!hasCustom) {
+  const hasPlaceholders = state.galleryItems.some(item => item.url && item.url.startsWith('https://picsum.photos/'));
+  if (hasPlaceholders) {
     state.galleryItems = [];
   }
   state.galleryItems.push({type,url:'',caption:'',timestamp:''});
@@ -1880,13 +1864,13 @@ async function confirmAndShare(){
     let finalDParam = LZString.compressToEncodedURIComponent(json);
     let url = baseUrl + '?d=' + finalDParam;
     
-    // Silently truncate gallery items if the URL exceeds 2000 characters
-    if (url.length > 2000 && payloadState.galleryItems.length > 1) {
+    // Silently truncate gallery items if the URL exceeds 150000 characters (extremely relaxed limit to prevent deleting user photos)
+    if (url.length > 150000 && payloadState.galleryItems.length > 1) {
       if (warningEl) {
         warningEl.textContent = "⚠️ Some photos were omitted/truncated to keep the link short enough to share.";
         warningEl.style.display = 'block';
       }
-      while (url.length > 2000 && payloadState.galleryItems.length > 1) {
+      while (url.length > 150000 && payloadState.galleryItems.length > 1) {
         payloadState.galleryItems.pop();
         json = JSON.stringify(payloadState);
         finalDParam = LZString.compressToEncodedURIComponent(json);
@@ -1946,7 +1930,21 @@ async function uploadAssetIfNeeded(itemOrGift) {
         itemOrGift.cdnUrl = base64Data;
       } else {
         try {
-          const cdnUrl = await uploadFileToCDN(record.data);
+          // Compress the image before uploading to keep it small and fast!
+          const base64Data = await compressImage(record.data);
+          let uploadBlob = record.data;
+          if (base64Data && base64Data.startsWith('data:')) {
+            const arr = base64Data.split(',');
+            const mime = arr[0].match(/:(.*?);/)[1];
+            const bstr = atob(arr[1]);
+            let n = bstr.length;
+            const u8arr = new Uint8Array(n);
+            while (n--) {
+              u8arr[n] = bstr.charCodeAt(n);
+            }
+            uploadBlob = new Blob([u8arr], { type: mime });
+          }
+          const cdnUrl = await uploadFileToCDN(uploadBlob);
           itemOrGift.cdnUrl = cdnUrl;
         } catch (uploadErr) {
           console.warn("CDN upload failed, falling back to base64:", uploadErr);
@@ -2263,8 +2261,8 @@ async function handleFiles(files) {
   title.textContent = 'Processing Uploads...';
   desc.textContent = 'Saving memories to your device storage...';
   
-  const hasCustom = state.galleryItems.some(item => item.localId || (item.url && item.url.startsWith('data:')));
-  if (!hasCustom) {
+  const hasPlaceholders = state.galleryItems.some(item => item.url && item.url.startsWith('https://picsum.photos/'));
+  if (hasPlaceholders) {
     state.galleryItems = [];
   }
   for (let i = 0; i < files.length; i++) {
