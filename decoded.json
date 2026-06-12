@@ -1,0 +1,100 @@
+{
+  "badge": "Our 1st Anniversary",
+  "titleText": "Happy Anniversary, My Love",
+  "subtitle": "Every single day with you is a gift. Please open the envelope below...",
+  "letterTitle": "My Dearest,",
+  "letterP1": "Happy 1st Anniversary! Today is a celebration of us, but I also want to take this moment to say I'm truly sorry for the mistakes I've made. Sometimes I take your gentle patience for granted, and I regret any time I've brought a shadow to your face.",
+  "letterP2": "You deserve the absolute world, and I promise to listen closer, support you deeper, and love you better every day. Thank you for being my light and my home.",
+  "letterSignoff": "Forever Yours,",
+  "partnerName": "Prayas",
+  "balloonMessages": [
+    "I love the way your eyes sparkle when you are genuinely happy. ✨",
+    "Happy Anniversary! You are the absolute best thing that ever happened to me. 💖",
+    "I'm sorry for being stubborn sometimes. I promise to listen closer and hold you tighter. 🌸",
+    "My favourite place in the entire world is next to you, laughing at nothing. 💫",
+    "You are my sweet girl, my best friend, and my greatest adventure. Happy 1 Year! 🌹"
+  ],
+  "galleryItems": [
+    {
+      "type": "image",
+      "url": "https://picsum.photos/id/83/600/800",
+      "caption": "Where it all began... 🌸",
+      "timestamp": "January 2024"
+    },
+    {
+      "type": "image",
+      "url": "https://picsum.photos/id/240/600/800",
+      "caption": "Laughing at nothing 💫",
+      "timestamp": "February 2024"
+    },
+    {
+      "type": "image",
+      "url": "https://picsum.photos/id/338/600/400",
+      "caption": "Our cozy winter getaway ❄️",
+      "timestamp": "March 2024"
+    },
+    {
+      "type": "image",
+      "url": "https://picsum.photos/id/367/600/800",
+      "caption": "The brightest smile! 💖",
+      "timestamp": "April 2024"
+    },
+    {
+      "type": "image",
+      "url": "https://picsum.photos/id/64/600/600",
+      "caption": "Adventures together 🌿",
+      "timestamp": "May 2024"
+    },
+    {
+      "type": "image",
+      "url": "https://picsum.photos/id/225/600/400",
+      "caption": "Sunset vibes 🌅",
+      "timestamp": "June 2024"
+    },
+    {
+      "type": "image",
+      "url": "https://picsum.photos/id/399/600/800",
+      "caption": "My favourite person 💕",
+      "timestamp": "July 2024"
+    },
+    {
+      "type": "image",
+      "url": "https://picsum.photos/id/453/600/600",
+      "caption": "Making memories 🎀",
+      "timestamp": "August 2024"
+    },
+    {
+      "type": "image",
+      "url": "https://picsum.photos/id/325/600/400",
+      "caption": "You and me 🌹",
+      "timestamp": "September 2024"
+    },
+    {
+      "type": "image",
+      "url": "https://picsum.photos/id/431/600/800",
+      "caption": "Forever grateful for you ✨",
+      "timestamp": "October 2024"
+    }
+  ],
+  "gifts": {
+    "flowers": {
+      "title": "A Bouquet of Sweetness",
+      "description": "A beautiful arrangement of your favourite flowers (roses and pink peonies) to show how much you brighten my days.",
+      "image": "https://images.unsplash.com/photo-1561181286-d3fee7d55364?q=80&w=1000"
+    },
+    "earrings": {
+      "title": "A Token of Promise",
+      "description": "Sterling silver earrings chosen with love. Inspired by that sketch of us choosing earrings together on a cozy street corner.",
+      "image": "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?q=80&w=1000"
+    },
+    "date": {
+      "title": "Our Next Adventure",
+      "description": "A special invitation reserved just for the two of us, to celebrate properly.",
+      "ticketTitle": "AN EVENING FOR US",
+      "ticketDetails": "✨ Dinner, Drinks & Quality Time ✨",
+      "ticketValidation": "VALID FOREVER • FOR MY SWEETHEART",
+      "image": "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=1000",
+      "venue": "Cozy Beachside Resort"
+    }
+  }
+}
